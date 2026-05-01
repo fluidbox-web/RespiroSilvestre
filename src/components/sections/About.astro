@@ -1,0 +1,61 @@
+---
+import { useTranslations } from '../../i18n/utils';
+import type { ui } from '../../i18n/ui';
+import { Award, HeartHandshake, Users } from 'lucide-astro';
+
+interface Props { lang: keyof typeof ui; }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+<section class="py-20 md:py-25 px-6 sm:px-10 bg-slate-50">
+	<div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12" id="about-content">
+		<div class="w-full md:w-1/2">
+			<div class="w-full aspect-[4/5] rounded-3xl overflow-hidden relative shadow-xl">
+				<img src="/assets/profile/profile.jpg" alt={t('home.about.image_alt')} class="w-full h-full object-cover" />
+			</div>
+		</div>
+		<div class="w-full md:w-1/2">
+			<h2 class="text-teal-600 font-semibold tracking-wider uppercase mb-2">{t('home.about.title')}</h2>
+			<h3 class="text-3xl md:text-4xl font-bold text-slate-900 mb-6">{t('home.about.name')}</h3>
+			<p class="text-lg text-slate-600 mb-8 leading-relaxed">
+				{t('home.about.bio')}
+			</p>
+			<div class="flex flex-col gap-4">
+				<div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+					<div class="w-14 h-14 bg-teal-50 rounded-full flex-shrink-0 flex items-center justify-center text-teal-600 p-2">
+						<Award class="w-7 h-7" />
+					</div>
+					<p class="font-medium text-slate-800 text-lg">{t('home.about.certifications')}</p>
+				</div>
+				<div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+					<div class="w-14 h-14 bg-teal-50 rounded-full flex-shrink-0 flex items-center justify-center text-teal-600 p-2">
+						<HeartHandshake class="w-7 h-7" />
+					</div>
+					<p class="font-medium text-slate-800 text-lg">{t('home.about.experience')}</p>
+				</div>
+				<div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+					<div class="w-14 h-14 bg-teal-50 rounded-full flex-shrink-0 flex items-center justify-center text-teal-600 p-2">
+						<Users class="w-7 h-7" />
+					</div>
+					<p class="font-medium text-slate-800 text-lg">{t('home.about.clients')}</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<script>
+	import { gsap } from "gsap";
+    import { ScrollTrigger } from "gsap/ScrollTrigger";
+    gsap.registerPlugin(ScrollTrigger);
+
+	gsap.from("#about-content", { 
+        scrollTrigger: {
+            trigger: "#about-content",
+            start: "top 80%",
+        },
+        opacity: 0, 
+        y: 30, 
+        duration: 1, 
+        ease: "power3.out" 
+    });
+</script>

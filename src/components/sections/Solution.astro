@@ -1,0 +1,72 @@
+---
+import { useTranslations } from '../../i18n/utils';
+import type { ui } from '../../i18n/ui';
+import { Sparkles, Moon, Activity } from 'lucide-astro';
+
+interface Props { lang: keyof typeof ui; }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+<section class="py-20 px-4 bg-teal-900 text-white">
+	<div class="max-w-7xl mx-auto" id="solution-content">
+		<div class="text-center mb-16">
+			<h2 class="text-3xl md:text-4xl font-bold mb-4">{t('home.solution.title')}</h2>
+			<div class="w-24 h-1 bg-teal-500 mx-auto rounded-full"></div>
+		</div>
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+			<div class="bg-teal-800 rounded-2xl border border-teal-700 hover:bg-teal-700 transition-colors overflow-hidden flex flex-col group">
+				<div class="w-full h-48 relative overflow-hidden">
+					<img src="/assets/Solution/1.jpg" alt="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+					<div class="absolute top-4 right-4 w-14 h-14 bg-teal-500 rounded-2xl flex items-center justify-center shadow-lg z-10">
+						<Sparkles class="w-7 h-7 text-white" />
+					</div>
+				</div>
+				<div class="p-8 pt-6 flex-grow flex flex-col">
+					<h3 class="text-xl font-bold mb-3">{t('home.solution.1.title')}</h3>
+					<p class="text-teal-100">{t('home.solution.1.desc')}</p>
+				</div>
+			</div>
+			<div class="bg-teal-800 rounded-2xl border border-teal-700 hover:bg-teal-700 transition-colors overflow-hidden flex flex-col group">
+				<div class="w-full h-48 relative overflow-hidden">
+					<img src="/assets/Solution/2.jpg" alt="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+					<div class="absolute top-4 right-4 w-14 h-14 bg-teal-500 rounded-2xl flex items-center justify-center shadow-lg z-10">
+						<Moon class="w-7 h-7 text-white" />
+					</div>
+				</div>
+				<div class="p-8 pt-6 flex-grow flex flex-col">
+					<h3 class="text-xl font-bold mb-3">{t('home.solution.2.title')}</h3>
+					<p class="text-teal-100">{t('home.solution.2.desc')}</p>
+				</div>
+			</div>
+			<div class="bg-teal-800 rounded-2xl border border-teal-700 hover:bg-teal-700 transition-colors overflow-hidden flex flex-col group">
+				<div class="w-full h-48 relative overflow-hidden">
+					<img src="/assets/Solution/3.jpg" alt="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+					<div class="absolute top-4 right-4 w-14 h-14 bg-teal-500 rounded-2xl flex items-center justify-center shadow-lg z-10">
+						<Activity class="w-7 h-7 text-white" />
+					</div>
+				</div>
+				<div class="p-8 pt-6 flex-grow flex flex-col">
+					<h3 class="text-xl font-bold mb-3">{t('home.solution.3.title')}</h3>
+					<p class="text-teal-100">{t('home.solution.3.desc')}</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<script>
+	import { gsap } from "gsap";
+    import { ScrollTrigger } from "gsap/ScrollTrigger";
+    gsap.registerPlugin(ScrollTrigger);
+
+	gsap.from("#solution-content > div", { 
+        scrollTrigger: {
+            trigger: "#solution-content",
+            start: "top 80%",
+        },
+        opacity: 0, 
+        y: 40, 
+        duration: 0.8,
+        stagger: 0.2,
+        ease: "power3.out" 
+    });
+</script>

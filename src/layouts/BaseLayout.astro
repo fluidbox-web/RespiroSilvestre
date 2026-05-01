@@ -1,0 +1,32 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getLangFromUrl } from '../i18n/utils';
+
+interface Props {
+	title: string;
+	description?: string;
+}
+
+const { title, description = "Masajes profesionales y terapias de relajación." } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+---
+
+<html lang={lang}>
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<meta name="description" content={description} />
+		<title>{title} | Hilda Romero Masajes</title>
+	</head>
+	<body class="bg-slate-50 text-slate-900 flex flex-col min-h-screen">
+		<Header />
+		<main class="flex-grow">
+			<slot />
+		</main>
+		<Footer />
+	</body>
+</html>

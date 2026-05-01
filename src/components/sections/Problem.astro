@@ -1,0 +1,115 @@
+---
+import { useTranslations } from '../../i18n/utils';
+import type { ui } from '../../i18n/ui';
+import { AlertCircle } from 'lucide-astro';
+
+interface Props { lang: keyof typeof ui; }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+<section class="py-20 md:py-20 px-6 sm:px-10 bg-white">
+	<div class="max-w-7xl mx-auto" id="problem-content">
+		<div class="text-center mb-16">
+			<h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">{t('home.problem.title')}</h2>
+			<div class="w-24 h-1 bg-rose-400 mx-auto rounded-full"></div>
+		</div>
+		
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+			<!-- Problem 1 -->
+			<div class="problem-card-wrapper flex">
+				<div class="w-full problem-card bg-slate-50 rounded-3xl border border-slate-200 hover:border-rose-300 hover:shadow-lg transition-all overflow-hidden flex flex-col group">
+					<div class="w-full h-56 relative overflow-hidden bg-slate-200 flex items-center justify-center">
+						<img src="/assets/Problem/M1.jpg" alt={t('home.problem.q1')} class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 z-10" />
+						<div class="absolute top-4 right-4 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-sm z-20">
+							<AlertCircle class="w-6 h-6 text-rose-500" />
+						</div>
+					</div>
+					<div class="p-6 flex-grow flex flex-col justify-center text-center">
+						<p class="text-lg text-slate-800 font-semibold leading-relaxed">{t('home.problem.q1')}</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Problem 2 -->
+			<div class="problem-card-wrapper flex">
+				<div class="w-full problem-card bg-slate-50 rounded-3xl border border-slate-200 hover:border-rose-300 hover:shadow-lg transition-all overflow-hidden flex flex-col group">
+					<div class="w-full h-56 relative overflow-hidden bg-slate-200 flex items-center justify-center">
+						<img src="/assets/Problem/M2.jpg" alt={t('home.problem.q2')} class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 z-10" />
+						<div class="absolute top-4 right-4 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-sm z-20">
+							<AlertCircle class="w-6 h-6 text-rose-500" />
+						</div>
+					</div>
+					<div class="p-6 flex-grow flex flex-col justify-center text-center">
+						<p class="text-lg text-slate-800 font-semibold leading-relaxed">{t('home.problem.q2')}</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Problem 3 -->
+			<div class="problem-card-wrapper flex">
+				<div class="w-full problem-card bg-slate-50 rounded-3xl border border-slate-200 hover:border-rose-300 hover:shadow-lg transition-all overflow-hidden flex flex-col group">
+					<div class="w-full h-56 relative overflow-hidden bg-slate-200 flex items-center justify-center">
+						<img src="/assets/Problem/M3.jpg" alt={t('home.problem.q3')} class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 z-10" />
+						<div class="absolute top-4 right-4 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-sm z-20">
+							<AlertCircle class="w-6 h-6 text-rose-500" />
+						</div>
+					</div>
+					<div class="p-6 flex-grow flex flex-col justify-center text-center">
+						<p class="text-lg text-slate-800 font-semibold leading-relaxed">{t('home.problem.q3')}</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Mensaje empático -->
+		<div class="bg-teal-50 border border-teal-100 p-6 md:p-8 rounded-3xl text-center max-w-5xl mx-auto shadow-sm" id="problem-message">
+			<p class="text-lg text-teal-800 font-medium italic leading-relaxed">
+				"{t('home.problem.desc')}"
+			</p>
+		</div>
+	</div>
+</section>
+<script>
+	import { gsap } from "gsap";
+    import { ScrollTrigger } from "gsap/ScrollTrigger";
+    gsap.registerPlugin(ScrollTrigger);
+
+	// Animar título y línea
+	gsap.from("#problem-content h2, #problem-content .w-24", {
+		scrollTrigger: {
+            trigger: "#problem-content",
+            start: "top 80%",
+        },
+        opacity: 0, 
+        y: 20, 
+        duration: 0.8,
+		stagger: 0.1,
+        ease: "power3.out"
+	});
+
+	// Animar tarjetas individualmente
+	gsap.from(".problem-card-wrapper", { 
+        scrollTrigger: {
+            trigger: ".problem-card-wrapper",
+            start: "top 85%",
+        },
+        opacity: 0, 
+        y: 40, 
+        duration: 0.8, 
+		stagger: 0.2,
+        ease: "power3.out",
+		clearProps: "all"
+    });
+
+	// Animar el mensaje final
+	gsap.from("#problem-message", { 
+        scrollTrigger: {
+            trigger: "#problem-message",
+            start: "top 90%",
+        },
+        opacity: 0, 
+        scale: 0.95,
+        duration: 0.8, 
+        ease: "power3.out" 
+    });
+</script>

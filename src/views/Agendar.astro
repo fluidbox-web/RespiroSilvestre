@@ -1,0 +1,203 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { useTranslations } from '../i18n/utils';
+import { ui } from '../i18n/ui';
+import { Send, MessageCircle, CheckCircle2 } from 'lucide-astro';
+
+interface Props {
+  lang: keyof typeof ui;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// Lista de servicios para el dropdown
+const services = [
+	{ id: '1', name: t('home.pricing.1.title' as any) },
+	{ id: '2', name: t('home.pricing.2.title' as any) },
+	{ id: '3', name: t('home.pricing.3.title' as any) },
+	{ id: '4', name: t('home.pricing.4.title' as any) },
+	{ id: '5', name: t('home.pricing.5.title' as any) },
+];
+---
+
+<BaseLayout title={t('book.title')}>
+	<div class="bg-slate-50 min-h-screen py-16 md:py-24">
+		<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="text-center mb-12">
+				<h1 class="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+					{t('book.title')} <span id="dynamic-service-name" class="text-teal-600 block md:inline mt-2 md:mt-0"></span>
+				</h1>
+				<p class="text-lg text-slate-600 max-w-2xl mx-auto">{t('book.subtitle')}</p>
+			</div>
+			
+			<div class="grid grid-cols-1 md:grid-cols-5 gap-8 items-start">
+				<!-- Form Column -->
+				<div class="md:col-span-3 bg-white p-8 md:p-10 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
+					<div class="mb-8 border-b border-slate-100 pb-6">
+						<h2 class="text-2xl font-bold text-slate-800 mb-2">{t('book.form.title')}</h2>
+						<p class="text-slate-600">{t('book.form.desc')}</p>
+					</div>
+
+					<!-- Form -->
+					<form id="booking-form" class="space-y-6">
+						<div>
+							<label for="name" class="block text-sm font-semibold text-slate-700 mb-2">{t('book.form.name')}</label>
+							<input type="text" id="name" name="name" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all bg-slate-50 focus:bg-white" placeholder="Ej. María Pérez" />
+						</div>
+						
+						<div>
+							<label for="phone" class="block text-sm font-semibold text-slate-700 mb-2">{t('book.form.phone')}</label>
+							<input type="tel" id="phone" name="phone" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all bg-slate-50 focus:bg-white" placeholder="Ej. 983 123 4567" />
+						</div>
+
+						<div>
+							<label for="datetime" class="block text-sm font-semibold text-slate-700 mb-2">{t('book.form.datetime')}</label>
+							<input type="datetime-local" id="datetime" name="datetime" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-700" />
+						</div>
+
+						<div>
+							<label for="service" class="block text-sm font-semibold text-slate-700 mb-2">{t('book.form.service')}</label>
+							<select id="service" name="service" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800">
+								<option value="" disabled selected>{t('book.form.service.default')}</option>
+								{services.map(s => (
+									<option value={s.id}>{s.name.replace('🌿 ', '')}</option>
+								))}
+							</select>
+						</div>
+
+						<button type="submit" id="submit-btn" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-teal-200 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-1">
+							<Send class="w-5 h-5" />
+							<span>{t('book.form.submit')}</span>
+						</button>
+					</form>
+
+					<!-- Success Message (Hidden by default) -->
+					<div id="success-message" class="hidden text-center py-10">
+						<div class="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6 text-teal-600">
+							<CheckCircle2 class="w-12 h-12" />
+						</div>
+						<h3 class="text-3xl font-bold text-slate-800 mb-4">{t('book.success.title')}</h3>
+						<p class="text-slate-600 text-lg">{t('book.success.desc')}</p>
+					</div>
+				</div>
+
+				<!-- WhatsApp Column -->
+				<div class="md:col-span-2 bg-gradient-to-br from-emerald-500 to-emerald-700 p-8 md:p-10 rounded-3xl shadow-xl shadow-emerald-200/50 text-white sticky top-24">
+					<h2 class="text-2xl font-bold mb-4">{t('book.wa.title')}</h2>
+					<p class="text-emerald-50 mb-8 leading-relaxed text-lg">
+						{t('book.wa.desc')}
+					</p>
+					
+					<a id="wa-button" href="https://wa.me/529837534870?text=Hola%20Hilda%2C%20quisiera%20agendar%20una%20cita." target="_blank" rel="noopener noreferrer" class="w-full bg-white text-emerald-600 hover:bg-emerald-50 font-bold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all transform hover:-translate-y-1 text-lg text-center">
+						<MessageCircle class="w-6 h-6" />
+						{t('book.wa.btn')}
+					</a>
+					
+					<div class="mt-10 rounded-2xl overflow-hidden shadow-lg border border-emerald-400/30 bg-emerald-800">
+						<img src="/assets/hero/Hero.jpg" alt="Masaje terapéutico" class="w-full h-56 object-cover object-center opacity-80 hover:opacity-100 transition-opacity duration-500" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</BaseLayout>
+
+<script>
+	// IMPORTANTE: Reemplazar con el Webhook URL real de Make.com
+	const MAKE_WEBHOOK_URL = 'https://hook.us1.make.com/REEMPLAZAR_CON_TU_WEBHOOK_ID';
+
+	document.addEventListener('DOMContentLoaded', () => {
+		const form = document.getElementById('booking-form') as HTMLFormElement;
+		const serviceSelect = document.getElementById('service') as HTMLSelectElement;
+		const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+		const successMessage = document.getElementById('success-message');
+		const waButton = document.getElementById('wa-button') as HTMLAnchorElement;
+		const dynamicServiceName = document.getElementById('dynamic-service-name');
+
+		// 1. Leer parámetros de la URL para pre-seleccionar servicio
+		const params = new URLSearchParams(window.location.search);
+		const serviceId = params.get('service');
+		
+		if (serviceId && serviceSelect) {
+			const optionToSelect = Array.from(serviceSelect.options).find(opt => opt.value === serviceId);
+			if (optionToSelect) {
+				optionToSelect.selected = true;
+				updateWhatsAppLink();
+			}
+		}
+
+		// 2. Actualizar el enlace de WhatsApp cuando cambie el servicio en el dropdown
+		if (serviceSelect) {
+			serviceSelect.addEventListener('change', updateWhatsAppLink);
+		}
+
+		function updateWhatsAppLink() {
+			if(!serviceSelect) return;
+			const selectedText = serviceSelect.options[serviceSelect.selectedIndex]?.text;
+			
+			// Actualizar el título dinámico
+			if (dynamicServiceName && serviceSelect.value !== "") {
+				dynamicServiceName.textContent = selectedText.replace('🌿 ', '').toLowerCase();
+			}
+
+			// Actualizar WhatsApp
+			if(waButton) {
+				let message = "Hola Hilda, quisiera agendar una cita.";
+				if (selectedText && serviceSelect.value !== "") {
+					message = `Hola Hilda, quisiera agendar una cita para el servicio: ${selectedText.replace('🌿 ', '')}.`;
+				}
+				waButton.href = `https://wa.me/529837534870?text=${encodeURIComponent(message)}`;
+			}
+		}
+
+		// 3. Manejar el envío del formulario a Make.com
+		if (form) {
+			form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				
+				const formData = new FormData(form);
+				const data = {
+					name: formData.get('name'),
+					phone: formData.get('phone'),
+					datetime: formData.get('datetime'),
+					serviceId: formData.get('service'),
+					serviceName: serviceSelect.options[serviceSelect.selectedIndex]?.text,
+					source: 'Website Form'
+				};
+
+				// Cambiar estado del botón a "Enviando..."
+				const originalBtnText = submitBtn.innerHTML;
+				submitBtn.innerHTML = 'Enviando...';
+				submitBtn.disabled = true;
+				submitBtn.classList.add('opacity-70');
+
+				try {
+					// Envío del webhook a Make.com
+					const response = await fetch(MAKE_WEBHOOK_URL, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(data),
+						mode: 'no-cors' // Use no-cors to prevent CORS issues if make.com doesn't send proper headers
+					});
+
+					// Como usamos no-cors, la respuesta es opaca (siempre asume que se envió)
+					// Ocultar formulario y mostrar mensaje de éxito
+					form.classList.add('hidden');
+					if(successMessage) {
+						successMessage.classList.remove('hidden');
+					}
+					
+				} catch (error) {
+					console.error('Error enviando a Make:', error);
+					alert('Hubo un error de conexión al enviar tus datos. Por favor, intenta usar la opción de WhatsApp.');
+					submitBtn.innerHTML = originalBtnText;
+					submitBtn.disabled = false;
+					submitBtn.classList.remove('opacity-70');
+				}
+			});
+		}
+	});
+</script>

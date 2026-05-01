@@ -1,0 +1,102 @@
+---
+import { useTranslations } from '../../i18n/utils';
+import type { ui } from '../../i18n/ui';
+import { Star, Quote } from 'lucide-astro';
+
+interface Props { lang: keyof typeof ui; }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+<section class="py-24 md:py-20 px-6 sm:px-10 bg-white">
+	<div class="max-w-7xl mx-auto" id="testimonials-content">
+		<div class="text-center mb-16">
+			<h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">{t('home.testimonials.title')}</h2>
+			<div class="w-24 h-1 bg-teal-500 mx-auto rounded-full"></div>
+		</div>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+			<!-- Testimonial 1 -->
+			<div class="testimonial-card flex">
+				<div class="w-full bg-slate-50 border border-slate-200 p-8 md:p-10 rounded-3xl relative shadow-md flex flex-col hover:shadow-xl transition-shadow duration-300">
+					<div class="flex items-center gap-1 mb-6">
+						{Array.from({ length: 5 }).map(() => (
+							<Star class="w-5 h-5 fill-amber-400 text-amber-400" />
+						))}
+					</div>
+					<Quote class="w-16 h-16 text-teal-100 absolute top-8 right-8 rotate-180 opacity-50" />
+					
+					<p class="text-lg text-slate-700 italic mb-8 relative z-10 flex-grow leading-relaxed">
+						"{t('home.testimonials.1.text')}"
+					</p>
+					
+					<div class="flex items-center gap-4 border-t border-slate-200 pt-6">
+						<div class="w-12 h-12 bg-teal-200 rounded-full flex items-center justify-center text-teal-800 font-bold text-xl flex-shrink-0 shadow-sm">
+							{t('home.testimonials.1.author').toString().charAt(0)}
+						</div>
+						<div>
+							<p class="font-bold text-slate-900">{t('home.testimonials.1.author')}</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Testimonial 2 -->
+			<div class="testimonial-card flex">
+				<div class="w-full bg-slate-50 border border-slate-200 p-8 md:p-10 rounded-3xl relative shadow-md flex flex-col hover:shadow-xl transition-shadow duration-300">
+					<div class="flex items-center gap-1 mb-6">
+						{Array.from({ length: 5 }).map(() => (
+							<Star class="w-5 h-5 fill-amber-400 text-amber-400" />
+						))}
+					</div>
+					<Quote class="w-16 h-16 text-teal-100 absolute top-8 right-8 rotate-180 opacity-50" />
+					
+					<p class="text-lg text-slate-700 italic mb-8 relative z-10 flex-grow leading-relaxed">
+						"{t('home.testimonials.2.text')}"
+					</p>
+					
+					<div class="flex items-center gap-4 border-t border-slate-200 pt-6">
+						<div class="w-12 h-12 bg-teal-200 rounded-full flex items-center justify-center text-teal-800 font-bold text-xl flex-shrink-0 shadow-sm">
+							{t('home.testimonials.2.author').toString().charAt(0)}
+						</div>
+						<div>
+							<p class="font-bold text-slate-900">{t('home.testimonials.2.author')}</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+	import { gsap } from "gsap";
+    import { ScrollTrigger } from "gsap/ScrollTrigger";
+    gsap.registerPlugin(ScrollTrigger);
+
+	// Animar título y línea
+	gsap.from("#testimonials-content h2, #testimonials-content .w-24", {
+		scrollTrigger: {
+            trigger: "#testimonials-content",
+            start: "top 80%",
+        },
+        opacity: 0, 
+        y: 20, 
+        duration: 0.8,
+		stagger: 0.1,
+        ease: "power3.out"
+	});
+
+	// Animar tarjetas de testimonios individualmente
+	gsap.from(".testimonial-card", { 
+        scrollTrigger: {
+            trigger: ".testimonial-card",
+            start: "top 85%",
+        },
+        opacity: 0, 
+        y: 40, 
+        duration: 0.8, 
+		stagger: 0.2,
+        ease: "power3.out",
+		clearProps: "all"
+    });
+</script>

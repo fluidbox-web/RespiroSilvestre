@@ -1,0 +1,87 @@
+---
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+let currentPath = Astro.url.pathname;
+if (lang === 'en' && currentPath.startsWith('/en')) {
+  currentPath = currentPath.replace('/en', '') || '/';
+}
+---
+<header class="bg-white shadow-sm sticky top-0 z-50">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+		<!-- Logo -->
+		<div class="text-2xl font-bold text-teal-600 z-20 relative">
+			<a href={translatePath('/')}>Hilda Romero</a>
+		</div>
+
+		<!-- Desktop Navigation -->
+		<div class="hidden md:flex items-center gap-6">
+			<nav class="flex gap-6 items-center">
+				<a href={translatePath('/')} class="text-slate-600 hover:text-teal-600 font-medium transition-colors">{t('nav.home')}</a>
+				<a href={translatePath('/blog')} class="text-slate-600 hover:text-teal-600 font-medium transition-colors">{t('nav.blog')}</a>
+				<a href={translatePath('/agendar')} class="bg-teal-600 text-white px-5 py-2 rounded-full font-medium hover:bg-teal-700 transition-colors shadow-sm">
+					{t('nav.book')}
+				</a>
+			</nav>
+			<div class="border-l pl-6 border-slate-200 flex items-center">
+				<a href={translatePath(currentPath, 'es')} class={`text-sm font-bold ${lang === 'es' ? 'text-teal-600' : 'text-slate-400 hover:text-slate-600'}`}>ES</a>
+				<span class="text-slate-300 mx-2">|</span>
+				<a href={translatePath(currentPath, 'en')} class={`text-sm font-bold ${lang === 'en' ? 'text-teal-600' : 'text-slate-400 hover:text-slate-600'}`}>EN</a>
+			</div>
+		</div>
+
+		<!-- Mobile Menu Button -->
+		<button id="mobile-menu-btn" aria-label="Abrir menú" class="md:hidden z-20 relative p-2 text-slate-600 hover:text-teal-600 focus:outline-none">
+			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+			</svg>
+		</button>
+	</div>
+
+	<!-- Mobile Navigation Menu -->
+	<div id="mobile-menu" class="fixed inset-0 bg-white z-10 transform translate-x-full transition-transform duration-300 ease-in-out md:hidden flex flex-col pt-24 px-6 shadow-2xl">
+		<nav class="flex flex-col gap-6 text-xl items-center">
+			<a href={translatePath('/')} class="mobile-link text-slate-800 hover:text-teal-600 font-medium">{t('nav.home')}</a>
+			<a href={translatePath('/blog')} class="mobile-link text-slate-800 hover:text-teal-600 font-medium">{t('nav.blog')}</a>
+			<a href={translatePath('/agendar')} class="mobile-link bg-teal-600 text-white px-8 py-4 rounded-full font-medium shadow-sm w-full text-center mt-4">
+				{t('nav.book')}
+			</a>
+		</nav>
+		<div class="mt-12 flex items-center justify-center gap-4">
+			<a href={translatePath(currentPath, 'es')} class={`text-lg font-bold px-6 py-2 rounded-lg ${lang === 'es' ? 'bg-teal-50 text-teal-600' : 'text-slate-500 border border-slate-200'}`}>ES</a>
+			<a href={translatePath(currentPath, 'en')} class={`text-lg font-bold px-6 py-2 rounded-lg ${lang === 'en' ? 'bg-teal-50 text-teal-600' : 'text-slate-500 border border-slate-200'}`}>EN</a>
+		</div>
+	</div>
+</header>
+
+<script>
+	const btn = document.getElementById('mobile-menu-btn');
+	const menu = document.getElementById('mobile-menu');
+	
+	if (btn && menu) {
+		btn.addEventListener('click', () => {
+			const isClosed = menu.classList.contains('translate-x-full');
+			if (isClosed) {
+				menu.classList.remove('translate-x-full');
+				btn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+				document.body.style.overflow = 'hidden';
+			} else {
+				menu.classList.add('translate-x-full');
+				btn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>`;
+				document.body.style.overflow = '';
+			}
+		});
+
+		const links = menu.querySelectorAll('.mobile-link, a[href]');
+		links.forEach(link => {
+			link.addEventListener('click', () => {
+				menu.classList.add('translate-x-full');
+				btn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>`;
+				document.body.style.overflow = '';
+			});
+		});
+	}
+</script>
