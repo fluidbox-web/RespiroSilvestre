@@ -6,11 +6,11 @@ interface Props { lang: keyof typeof ui; }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
-<section class="py-20 px-4 bg-teal-600 text-white">
+<section class="py-20 px-4 bg-jungle text-sand-light">
 	<div class="max-w-4xl mx-auto text-center" id="cta-content">
 		<h2 class="text-3xl md:text-5xl font-bold mb-6">{t('home.finalCta.title')}</h2>
-		<p class="text-xl text-teal-100 mb-10">{t('home.finalCta.subtitle')}</p>
-		<a href={lang === 'es' ? '/agendar' : '/en/agendar'} class="inline-block bg-white text-teal-700 hover:bg-teal-50 text-xl font-bold py-4 px-10 rounded-full shadow-lg transition-transform transform hover:scale-105">
+		<p class="text-xl text-sand/80 mb-10">{t('home.finalCta.subtitle')}</p>
+		<a href={lang === 'es' ? '/agendar' : '/en/agendar'} class="inline-block bg-sand-light text-jungle-dark hover:bg-sand text-xl font-bold py-4 px-10 rounded-full shadow-lg transition-transform transform hover:scale-105">
 			{t('home.finalCta.cta')}
 		</a>
 	</div>

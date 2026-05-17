@@ -1,16 +1,30 @@
 ---
+import { Image } from 'astro:assets';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { getLangFromUrl } from '../i18n/utils';
+import SchemaOrg from '../components/SchemaOrg.astro';
+import { getLangFromUrl, useTranslatedPath } from '../i18n/utils';
+import { BUSINESS_NAME } from '../config';
+import bgImage from '../assets/backgound/backgorund.jpg';
 
 interface Props {
 	title: string;
 	description?: string;
+	image?: string;
+	type?: string;
+	author?: string;
+	pubDate?: Date;
 }
 
-const { title, description = "Masajes profesionales y terapias de relajación." } = Astro.props;
+const { title, description = "Spa y terapias naturales en Chetumal para reconectar con tu esencia.", image, type = 'website', author, pubDate } = Astro.props;
 const lang = getLangFromUrl(Astro.url);
+const translatePath = useTranslatedPath(lang);
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImage = image ? new URL(image, Astro.site) : new URL('/assets/hero/Hero.jpg', Astro.site);
+
+const alternateLangs = ['es', 'en'] as const;
 ---
 
 <html lang={lang}>
@@ -20,13 +34,56 @@ const lang = getLangFromUrl(Astro.url);
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
-		<title>{title} | Hilda Romero Masajes</title>
+		<title>{title} | {BUSINESS_NAME}</title>
+
+		<link rel="canonical" href={canonicalURL} />
+		{alternateLangs.map(l => (
+			<link rel="alternate" hreflang={l} href={new URL(translatePath(Astro.url.pathname, l), Astro.site)} />
+		))}
+
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:type" content={type} />
+		<meta property="og:locale" content={lang === 'es' ? 'es_MX' : 'en_US'} />
+
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage} />
+
+		<SchemaOrg title={title} description={description} type={type} author={author} pubDate={pubDate} image={ogImage.toString()} />
 	</head>
-	<body class="bg-slate-50 text-slate-900 flex flex-col min-h-screen">
-		<Header />
-		<main class="flex-grow">
-			<slot />
-		</main>
-		<Footer />
+	<body class="relative text-jungle-dark flex flex-col min-h-screen">
+		<!-- Parallax Background -->
+		<div id="parallax-bg" class="fixed inset-0 z-0 pointer-events-none">
+			<Image src={bgImage} alt="" class="w-full h-[120%] object-cover" loading="eager" fetchpriority="high" />
+		</div>
+
+		<div class="relative z-10 flex flex-col min-h-screen">
+			<Header />
+			<main class="flex-grow">
+				<slot />
+			</main>
+			<Footer />
+		</div>
+
+		<script>
+			import { gsap } from "gsap";
+			import { ScrollTrigger } from "gsap/ScrollTrigger";
+			gsap.registerPlugin(ScrollTrigger);
+
+			gsap.to("#parallax-bg img", {
+				yPercent: 20,
+				ease: "none",
+				scrollTrigger: {
+					trigger: "body",
+					start: "top top",
+					end: "bottom bottom",
+					scrub: true
+				}
+			});
+		</script>
 	</body>
 </html>

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import { Calendar, User, Tag, ArrowLeft, MessageCircle } from 'lucide-astro';
+import { WHATSAPP_NUMBER } from '../config';
+import { Calendar, User, Tag, ArrowLeft, MessageCircle } from '@lucide/astro';
 
 interface Props {
   title: string;
@@ -20,17 +21,17 @@ const formattedDate = new Intl.DateTimeFormat('es-MX', {
   day: 'numeric'
 }).format(pubDate);
 
-const waMessage = encodeURIComponent(`Hola Hilda, leí tu artículo "${title}" y me gustaría saber más.`);
+const waMessage = encodeURIComponent(`Hola Respiro Silvestre, leí tu artículo "${title}" y me gustaría saber más.`);
 ---
-<BaseLayout title={title} description={description}>
-  <article class="bg-white min-h-screen">
+<BaseLayout title={title} description={description} image={image} type="article" author={author} pubDate={pubDate}>
+  <article class="bg-white/95 min-h-screen">
     <!-- Hero del post -->
     {image && (
-      <div class="relative h-[50vh] min-h-[340px] w-full overflow-hidden bg-slate-800">
+      <div class="relative h-[50vh] min-h-[340px] w-full overflow-hidden bg-jungle-dark">
         <img src={image} alt={imageAlt || title} class="w-full h-full object-cover opacity-75" />
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-jungle-dark/80 via-jungle-dark/30 to-transparent"></div>
         <div class="absolute bottom-0 left-0 right-0 p-8 md:p-16 max-w-4xl mx-auto">
-          <span class="inline-block text-teal-400 text-sm font-semibold uppercase tracking-wider mb-4">{category}</span>
+          <span class="inline-block text-earth-light text-sm font-semibold uppercase tracking-wider mb-4">{category}</span>
           <h1 class="text-3xl md:text-5xl font-extrabold text-white leading-tight">{title}</h1>
         </div>
       </div>
@@ -38,8 +39,8 @@ const waMessage = encodeURIComponent(`Hola Hilda, leí tu artículo "${title}" y
 
     <div class="max-w-3xl mx-auto px-6 py-12">
       <!-- Meta del post -->
-      <div class="flex flex-wrap items-center gap-6 text-sm text-slate-500 mb-12 pb-8 border-b border-slate-100">
-        <a href="/blog" class="flex items-center gap-2 text-teal-600 hover:text-teal-700 font-medium transition-colors">
+      <div class="flex flex-wrap items-center gap-6 text-sm text-jungle-dark/50 mb-12 pb-8 border-b border-sand-dark/20">
+        <a href="/blog" class="flex items-center gap-2 text-jungle hover:text-jungle-dark font-medium transition-colors">
           <ArrowLeft class="w-4 h-4" />
           Volver al blog
         </a>
@@ -59,26 +60,26 @@ const waMessage = encodeURIComponent(`Hola Hilda, leí tu artículo "${title}" y
 
       <!-- Contenido del post -->
       <div class="prose prose-lg prose-slate max-w-none
-        prose-headings:font-bold prose-headings:text-slate-800
+        prose-headings:font-bold prose-headings:text-jungle-dark
         prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4
-        prose-p:text-slate-600 prose-p:leading-relaxed
-        prose-a:text-teal-600 prose-a:no-underline hover:prose-a:underline
-        prose-strong:text-slate-800
-        prose-table:border prose-table:border-slate-200 prose-td:border prose-td:border-slate-200 prose-td:px-4 prose-td:py-2 prose-th:border prose-th:border-slate-300 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-50
-        prose-ul:text-slate-600 prose-li:my-1
+        prose-p:text-jungle-dark/70 prose-p:leading-relaxed
+        prose-a:text-jungle prose-a:no-underline hover:prose-a:underline
+        prose-strong:text-jungle-dark
+        prose-table:border prose-table:border-sand-dark/30 prose-td:border prose-td:border-sand-dark/30 prose-td:px-4 prose-td:py-2 prose-th:border prose-th:border-sand-dark/40 prose-th:px-4 prose-th:py-2 prose-th:bg-sand/50
+        prose-ul:text-jungle-dark/70 prose-li:my-1
         ">
         <slot />
       </div>
 
       <!-- CTA al final del post -->
-      <div class="mt-16 bg-teal-50 border border-teal-100 rounded-3xl p-8 md:p-10 text-center">
-        <h3 class="text-2xl font-bold text-slate-800 mb-3">¿Lista para sentirte mejor?</h3>
-        <p class="text-slate-600 mb-8">Da el primer paso. Agenda tu sesión hoy mismo o escríbeme con cualquier duda.</p>
+      <div class="mt-16 bg-jungle/10 border border-jungle/20 rounded-3xl p-8 md:p-10 text-center">
+        <h3 class="text-2xl font-bold text-jungle-dark mb-3">¿Lista para sentirte mejor?</h3>
+        <p class="text-jungle-dark/70 mb-8">Da el primer paso. Agenda tu sesión hoy mismo o escríbeme con cualquier duda.</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="/agendar" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-full transition-all transform hover:-translate-y-1 shadow-lg">
+          <a href="/agendar" class="bg-jungle hover:bg-jungle-dark text-white font-bold py-3 px-8 rounded-full transition-all transform hover:-translate-y-1 shadow-lg">
             Agendar mi sesión
           </a>
-          <a href={`https://wa.me/529837534870?text=${waMessage}`} target="_blank" rel="noopener noreferrer" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-8 rounded-full flex items-center justify-center gap-2 transition-all transform hover:-translate-y-1 shadow-lg">
+          <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`} target="_blank" rel="noopener noreferrer" class="bg-earth hover:bg-earth-dark text-white font-bold py-3 px-8 rounded-full flex items-center justify-center gap-2 transition-all transform hover:-translate-y-1 shadow-lg">
             <MessageCircle class="w-5 h-5" />
             Preguntar por WhatsApp
           </a>

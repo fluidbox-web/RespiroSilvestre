@@ -1,7 +1,9 @@
 ---
+import { Image } from 'astro:assets';
 import { useTranslations } from '../../i18n/utils';
 import type { ui } from '../../i18n/ui';
-import { MapPin } from 'lucide-astro';
+import { MapPin } from '@lucide/astro';
+import heroImage from '../../assets/hero/Hero.jpg';
 
 interface Props { lang: keyof typeof ui; }
 const { lang } = Astro.props;
@@ -9,21 +11,21 @@ const t = useTranslations(lang);
 ---
 <section class="relative h-[100svh] min-h-[600px] flex items-start overflow-hidden pt-35 lg:pt-30">
 	<!-- Background Image -->
-	<div class="absolute inset-0 z-0 bg-slate-900">
-		<img src="/assets/hero/Hero.jpg" alt={t('home.hero.image_alt')} class="w-full h-full object-cover object-center opacity-80" />
+	<div class="absolute inset-0 z-0 bg-jungle-dark">
+		<Image src={heroImage} alt={t('home.hero.image_alt')} class="w-full h-full object-cover object-center opacity-80" loading="eager" />
 		
 		<!-- Overlay Desktop: Left to Right -->
-		<div class="hidden md:block absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-900/70 to-transparent"></div>
+		<div class="hidden md:block absolute inset-0 bg-gradient-to-r from-jungle-dark/95 via-jungle-dark/70 to-transparent"></div>
 		
 		<!-- Overlay Mobile: Bottom to Top + Darker overall for readability -->
-		<div class="md:hidden absolute inset-0 bg-gradient-to-t from-slate-900/95 via-slate-900/60 to-slate-900/30"></div>
+		<div class="md:hidden absolute inset-0 bg-gradient-to-t from-jungle-dark/95 via-jungle-dark/60 to-jungle-dark/30"></div>
 	</div>
 
 	<!-- Content -->
 	<div class="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-10">
 		<div class="max-w-2xl text-center md:text-left mx-auto md:mx-0" id="hero-content">
-			<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-teal-50 mb-8 hero-anim">
-				<MapPin class="w-4 h-4 text-teal-400" />
+			<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sand-light mb-8 hero-anim">
+				<MapPin class="w-4 h-4 text-earth-light" />
 				<span class="text-sm font-medium tracking-wide">{t('home.hero.location')}</span>
 			</div>
 			
@@ -31,12 +33,12 @@ const t = useTranslations(lang);
 				{t('home.hero.title')}
 			</h1>
 			
-			<p class="text-lg sm:text-xl text-slate-300 mb-10 max-w-lg mx-auto md:mx-0 drop-shadow hero-anim">
+			<p class="text-lg sm:text-xl text-sand/80 mb-10 max-w-lg mx-auto md:mx-0 drop-shadow hero-anim">
 				{t('home.hero.subtitle')}
 			</p>
 			
 			<div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start hero-anim">
-				<a href={lang === 'es' ? '/agendar' : '/en/agendar'} class="w-full sm:w-auto bg-teal-500 hover:bg-teal-400 text-white text-lg font-bold py-4 px-10 rounded-full shadow-xl shadow-teal-900/50 transition-all transform hover:-translate-y-1 hover:shadow-2xl text-center">
+				<a href={lang === 'es' ? '/agendar' : '/en/agendar'} class="w-full sm:w-auto bg-jungle hover:bg-jungle-light text-white text-lg font-bold py-4 px-10 rounded-full shadow-xl shadow-jungle-dark/50 transition-all transform hover:-translate-y-1 hover:shadow-2xl text-center">
 					{t('home.hero.cta')}
 				</a>
 			</div>

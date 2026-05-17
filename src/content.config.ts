@@ -7,7 +7,7 @@ const blog = defineCollection({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
-    author: z.string().default('Hilda Romero'),
+    author: z.string().default('Respiro Silvestre'),
     category: z.string().default('Bienestar'),
     image: z.string().optional(),
     imageAlt: z.string().optional(),

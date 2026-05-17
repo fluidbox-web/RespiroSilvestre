@@ -1,53 +1,57 @@
 ---
+import { Image } from 'astro:assets';
 import { useTranslations } from '../../i18n/utils';
 import type { ui } from '../../i18n/ui';
-import { Sparkles, Moon, Activity } from 'lucide-astro';
+import { Leaf, TreePine, Sun } from '@lucide/astro';
+import solution1 from '../../assets/Solution/1.jpg';
+import solution2 from '../../assets/Solution/2.jpg';
+import solution3 from '../../assets/Solution/3.jpg';
 
 interface Props { lang: keyof typeof ui; }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
-<section class="py-20 px-4 bg-teal-900 text-white">
+<section class="py-20 px-4 bg-jungle-dark/95 text-sand-light">
 	<div class="max-w-7xl mx-auto" id="solution-content">
 		<div class="text-center mb-16">
 			<h2 class="text-3xl md:text-4xl font-bold mb-4">{t('home.solution.title')}</h2>
-			<div class="w-24 h-1 bg-teal-500 mx-auto rounded-full"></div>
+			<div class="w-24 h-1 bg-jungle-light mx-auto rounded-full"></div>
 		</div>
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-			<div class="bg-teal-800 rounded-2xl border border-teal-700 hover:bg-teal-700 transition-colors overflow-hidden flex flex-col group">
+			<div class="bg-jungle/80 rounded-2xl border border-jungle-light/30 hover:bg-jungle-light/80 transition-colors overflow-hidden flex flex-col group">
 				<div class="w-full h-48 relative overflow-hidden">
-					<img src="/assets/Solution/1.jpg" alt="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-					<div class="absolute top-4 right-4 w-14 h-14 bg-teal-500 rounded-2xl flex items-center justify-center shadow-lg z-10">
-						<Sparkles class="w-7 h-7 text-white" />
+					<Image src={solution1} alt={t('home.solution.1.title')} class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+					<div class="absolute top-4 right-4 w-14 h-14 bg-jungle-light rounded-2xl flex items-center justify-center shadow-lg z-10">
+						<Leaf class="w-7 h-7 text-white" />
 					</div>
 				</div>
 				<div class="p-8 pt-6 flex-grow flex flex-col">
 					<h3 class="text-xl font-bold mb-3">{t('home.solution.1.title')}</h3>
-					<p class="text-teal-100">{t('home.solution.1.desc')}</p>
+					<p class="text-sand/80">{t('home.solution.1.desc')}</p>
 				</div>
 			</div>
-			<div class="bg-teal-800 rounded-2xl border border-teal-700 hover:bg-teal-700 transition-colors overflow-hidden flex flex-col group">
+			<div class="bg-jungle/80 rounded-2xl border border-jungle-light/30 hover:bg-jungle-light/80 transition-colors overflow-hidden flex flex-col group">
 				<div class="w-full h-48 relative overflow-hidden">
-					<img src="/assets/Solution/2.jpg" alt="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-					<div class="absolute top-4 right-4 w-14 h-14 bg-teal-500 rounded-2xl flex items-center justify-center shadow-lg z-10">
-						<Moon class="w-7 h-7 text-white" />
+					<Image src={solution2} alt={t('home.solution.2.title')} class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+					<div class="absolute top-4 right-4 w-14 h-14 bg-jungle-light rounded-2xl flex items-center justify-center shadow-lg z-10">
+						<TreePine class="w-7 h-7 text-white" />
 					</div>
 				</div>
 				<div class="p-8 pt-6 flex-grow flex flex-col">
 					<h3 class="text-xl font-bold mb-3">{t('home.solution.2.title')}</h3>
-					<p class="text-teal-100">{t('home.solution.2.desc')}</p>
+					<p class="text-sand/80">{t('home.solution.2.desc')}</p>
 				</div>
 			</div>
-			<div class="bg-teal-800 rounded-2xl border border-teal-700 hover:bg-teal-700 transition-colors overflow-hidden flex flex-col group">
+			<div class="bg-jungle/80 rounded-2xl border border-jungle-light/30 hover:bg-jungle-light/80 transition-colors overflow-hidden flex flex-col group">
 				<div class="w-full h-48 relative overflow-hidden">
-					<img src="/assets/Solution/3.jpg" alt="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-					<div class="absolute top-4 right-4 w-14 h-14 bg-teal-500 rounded-2xl flex items-center justify-center shadow-lg z-10">
-						<Activity class="w-7 h-7 text-white" />
+					<Image src={solution3} alt={t('home.solution.3.title')} class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+					<div class="absolute top-4 right-4 w-14 h-14 bg-jungle-light rounded-2xl flex items-center justify-center shadow-lg z-10">
+						<Sun class="w-7 h-7 text-white" />
 					</div>
 				</div>
 				<div class="p-8 pt-6 flex-grow flex flex-col">
 					<h3 class="text-xl font-bold mb-3">{t('home.solution.3.title')}</h3>
-					<p class="text-teal-100">{t('home.solution.3.desc')}</p>
+					<p class="text-sand/80">{t('home.solution.3.desc')}</p>
 				</div>
 			</div>
 		</div>

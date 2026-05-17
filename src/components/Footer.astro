@@ -1,31 +1,32 @@
 ---
 import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+import { WHATSAPP_NUMBER } from '../config';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
 ---
-<footer class="bg-slate-900 text-slate-300 py-12">
+<footer class="bg-jungle-dark text-sand/80 py-12">
 	<div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
 		<div>
-			<h3 class="text-xl font-bold text-white mb-4">Hilda Romero</h3>
-			<p class="text-slate-400">{t('footer.subtitle')}</p>
+			<h3 class="text-xl font-bold text-sand-light mb-4">Respiro Silvestre</h3>
+			<p class="text-sand/60">{t('footer.subtitle')}</p>
 		</div>
 		<div>
-			<h4 class="text-lg font-semibold text-white mb-4">{t('footer.quickLinks')}</h4>
+			<h4 class="text-lg font-semibold text-sand-light mb-4">{t('footer.quickLinks')}</h4>
 			<ul class="space-y-2">
-				<li><a href={translatePath('/')} class="hover:text-teal-400 transition-colors">{t('nav.home')}</a></li>
-				<li><a href={translatePath('/blog')} class="hover:text-teal-400 transition-colors">{t('nav.blog')}</a></li>
-				<li><a href={translatePath('/agendar')} class="hover:text-teal-400 transition-colors">{t('nav.book')}</a></li>
+				<li><a href={translatePath('/')} class="hover:text-earth-light transition-colors">{t('nav.home')}</a></li>
+				<li><a href={translatePath('/blog')} class="hover:text-earth-light transition-colors">{t('nav.blog')}</a></li>
+				<li><a href={translatePath('/agendar')} class="hover:text-earth-light transition-colors">{t('nav.book')}</a></li>
 			</ul>
 		</div>
 		<div>
-			<h4 class="text-lg font-semibold text-white mb-4">{t('footer.contact')}</h4>
-			<p class="text-slate-400">info@hildaromero.com</p>
-			<p class="text-slate-400">+52 123 456 7890</p>
+			<h4 class="text-lg font-semibold text-sand-light mb-4">{t('footer.contact')}</h4>
+			<p class="text-sand/60">info@respirosilvestre.com</p>
+			<p class="text-sand/60">+{WHATSAPP_NUMBER.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})$/, '$1 $2 $3 $4')}</p>
 		</div>
 	</div>
-	<div class="mt-12 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
-		<p>&copy; {new Date().getFullYear()} Hilda Romero Masajes. {t('footer.rights')}</p>
+	<div class="mt-12 pt-8 border-t border-jungle-light/20 text-center text-sand/50 text-sm">
+		<p>&copy; {new Date().getFullYear()} Respiro Silvestre. {t('footer.rights')}</p>
 	</div>
 </footer>

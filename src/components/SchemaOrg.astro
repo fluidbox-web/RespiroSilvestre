@@ -1,0 +1,64 @@
+---
+import { BUSINESS_NAME, BUSINESS_LOCATION, WHATSAPP_NUMBER, CONTACT_EMAIL } from '../config';
+
+interface Props {
+  title: string;
+  description: string;
+  type?: string;
+  author?: string;
+  pubDate?: Date;
+  image?: string;
+}
+
+const { title, description, type = 'website', author, pubDate, image } = Astro.props;
+
+let schema: any;
+
+if (type === 'article') {
+  schema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: title,
+    description: description,
+    image: image,
+    url: Astro.url.href,
+    author: {
+      "@type": "Person",
+      name: author || BUSINESS_NAME,
+    },
+    datePublished: pubDate?.toISOString(),
+    publisher: {
+      "@type": "Organization",
+      name: BUSINESS_NAME,
+      logo: {
+        "@type": "ImageObject",
+        url: new URL('/favicon.svg', Astro.site).toString(),
+      },
+    },
+  };
+} else {
+  schema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: BUSINESS_NAME,
+    description: description,
+    image: image,
+    url: Astro.url.href,
+    telephone: `+${WHATSAPP_NUMBER}`,
+    email: CONTACT_EMAIL,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Chetumal",
+      addressRegion: "Quintana Roo",
+      addressCountry: "MX",
+    },
+    areaServed: {
+      "@type": "City",
+      name: "Chetumal",
+    },
+    priceRange: "$",
+  };
+}
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

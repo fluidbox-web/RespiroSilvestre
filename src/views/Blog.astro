@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { useTranslations } from '../i18n/utils';
 import { ui } from '../i18n/ui';
 import { getCollection } from 'astro:content';
-import { Calendar, ArrowRight } from 'lucide-astro';
+import { Calendar, ArrowRight } from '@lucide/astro';
 
 interface Props {
   lang: keyof typeof ui;
@@ -17,20 +17,20 @@ const posts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.
 ---
 
 <BaseLayout title={t('blog.title')}>
-  <div class="bg-slate-50 min-h-screen">
+  <div class="bg-sand/90 min-h-screen">
     <!-- Hero del blog -->
-    <div class="bg-teal-900 text-white py-20 md:py-28 px-6">
+    <div class="bg-jungle-dark text-white py-20 md:py-28 px-6">
       <div class="max-w-4xl mx-auto text-center">
-        <span class="text-teal-400 font-semibold text-sm uppercase tracking-widest mb-4 block">{t('blog.category')}</span>
+        <span class="text-earth-light font-semibold text-sm uppercase tracking-widest mb-4 block">{t('blog.category')}</span>
         <h1 class="text-4xl md:text-6xl font-extrabold mb-6">{t('blog.title')}</h1>
-        <p class="text-xl text-teal-200 max-w-2xl mx-auto">{t('blog.subtitle')}</p>
+        <p class="text-xl text-sand/70 max-w-2xl mx-auto">{t('blog.subtitle')}</p>
       </div>
     </div>
 
     <!-- Grid de posts -->
     <div class="max-w-7xl mx-auto px-6 py-16 md:py-24">
       {posts.length === 0 ? (
-        <p class="text-center text-slate-500 text-xl">No hay artículos publicados todavía.</p>
+        <p class="text-center text-jungle-dark/50 text-xl">No hay artículos publicados todavía.</p>
       ) : (
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {posts.map((post) => {
@@ -40,37 +40,37 @@ const posts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.
             }).format(post.data.pubDate);
             
             return (
-              <article class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col group">
+              <article class="bg-white/85 rounded-3xl shadow-sm border border-sand-dark/20 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col group">
                 {post.data.image && (
-                  <a href={`/blog/${slug}`} class="block h-56 overflow-hidden bg-slate-200 relative">
+                  <a href={`/blog/${slug}`} class="block h-56 overflow-hidden bg-sand-dark/20 relative">
                     <img 
                       src={post.data.image} 
                       alt={post.data.imageAlt || post.data.title}
                       class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     {post.data.featured && (
-                      <span class="absolute top-4 left-4 bg-teal-600 text-white text-xs font-bold uppercase tracking-wider py-1 px-3 rounded-full">
+                      <span class="absolute top-4 left-4 bg-jungle text-white text-xs font-bold uppercase tracking-wider py-1 px-3 rounded-full">
                         Destacado
                       </span>
                     )}
                   </a>
                 )}
                 <div class="p-8 flex flex-col flex-grow">
-                  <span class="text-teal-600 text-xs font-bold uppercase tracking-wider mb-3">{post.data.category}</span>
+                  <span class="text-jungle text-xs font-bold uppercase tracking-wider mb-3">{post.data.category}</span>
                   <a href={`/blog/${slug}`} class="block group/title">
-                    <h2 class="text-xl font-bold text-slate-800 mb-3 group-hover/title:text-teal-600 transition-colors leading-snug">
+                    <h2 class="text-xl font-bold text-jungle-dark mb-3 group-hover/title:text-jungle transition-colors leading-snug">
                       {post.data.title}
                     </h2>
                   </a>
-                  <p class="text-slate-600 text-sm mb-6 flex-grow leading-relaxed line-clamp-3">
+                  <p class="text-jungle-dark/70 text-sm mb-6 flex-grow leading-relaxed line-clamp-3">
                     {post.data.description}
                   </p>
-                  <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                    <div class="flex items-center gap-2 text-xs text-slate-400">
+                  <div class="flex items-center justify-between pt-4 border-t border-sand-dark/20">
+                    <div class="flex items-center gap-2 text-xs text-jungle-dark/40">
                       <Calendar class="w-3.5 h-3.5" />
                       <span>{formattedDate}</span>
                     </div>
-                    <a href={`/blog/${slug}`} class="flex items-center gap-1 text-teal-600 hover:text-teal-700 text-sm font-semibold transition-colors group/link">
+                    <a href={`/blog/${slug}`} class="flex items-center gap-1 text-jungle hover:text-jungle-dark text-sm font-semibold transition-colors group/link">
                       Leer más
                       <ArrowRight class="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
                     </a>

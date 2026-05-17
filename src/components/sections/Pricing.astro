@@ -1,7 +1,8 @@
 ---
 import { useTranslations } from '../../i18n/utils';
 import type { ui } from '../../i18n/ui';
-import { MessageCircle } from 'lucide-astro';
+import { MessageCircle } from '@lucide/astro';
+import { WHATSAPP_NUMBER } from '../../config';
 
 interface Props { lang: keyof typeof ui; }
 const { lang } = Astro.props;
@@ -16,35 +17,35 @@ const packages = [
 	{ id: 6, bestValue: false, isWhatsapp: true },
 ];
 ---
-<section class="py-28 md:py-25 px-6 sm:px-10 bg-slate-100">
+<section class="py-28 md:py-25 px-6 sm:px-10 bg-sand/85">
 	<div class="max-w-6xl mx-auto text-center" id="pricing-content">
-		<h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-12">{t('home.pricing.title')}</h2>
+		<h2 class="text-3xl md:text-4xl font-bold text-jungle-dark mb-12">{t('home.pricing.title')}</h2>
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 			{packages.map((pkg) => (
 				<div class="pricing-card-wrapper flex">
-					<div class={`w-full p-8 rounded-3xl shadow-sm border flex flex-col items-center transition-shadow duration-300 hover:shadow-xl ${pkg.bestValue ? 'bg-teal-900 border-teal-800 text-white' : pkg.isWhatsapp ? 'bg-emerald-50 border-emerald-100 text-slate-800' : 'bg-white border-slate-200 text-slate-800'}`}>
+					<div class={`w-full p-8 rounded-3xl shadow-sm border flex flex-col items-center transition-shadow duration-300 hover:shadow-xl ${pkg.bestValue ? 'bg-jungle-dark border-jungle-light/30 text-sand-light' : pkg.isWhatsapp ? 'bg-earth/10 border-earth/20 text-jungle-dark' : 'bg-white/85 border-sand-dark/20 text-jungle-dark'}`}>
 						{pkg.bestValue && (
-							<div class="bg-teal-500 text-white text-xs font-bold uppercase tracking-wider py-1 px-3 rounded-full mb-4">
+							<div class="bg-jungle-light text-white text-xs font-bold uppercase tracking-wider py-1 px-3 rounded-full mb-4">
 								Más Popular
 							</div>
 						)}
-						<h3 class={`text-xl font-bold mb-3 ${pkg.bestValue ? 'text-teal-200' : pkg.isWhatsapp ? 'text-emerald-700' : 'text-slate-800'}`}>
+						<h3 class={`text-xl font-bold mb-3 ${pkg.bestValue ? 'text-sand-light' : pkg.isWhatsapp ? 'text-earth-dark' : 'text-jungle-dark'}`}>
 							{t(`home.pricing.${pkg.id}.title` as any)}
 						</h3>
-						<div class={`text-4xl font-extrabold mb-6 ${pkg.bestValue ? 'text-white' : pkg.isWhatsapp ? 'text-emerald-600 text-3xl' : 'text-teal-600'}`}>
+						<div class={`text-4xl font-extrabold mb-6 ${pkg.bestValue ? 'text-white' : pkg.isWhatsapp ? 'text-earth text-3xl' : 'text-jungle'}`}>
 							{t(`home.pricing.${pkg.id}.price` as any)}
 						</div>
-						<p class={`text-center mb-8 flex-grow ${pkg.bestValue ? 'text-teal-100' : 'text-slate-600'}`}>
+						<p class={`text-center mb-8 flex-grow ${pkg.bestValue ? 'text-sand/80' : 'text-jungle-dark/70'}`}>
 							{t(`home.pricing.${pkg.id}.desc` as any)}
 						</p>
 						<a 
-							href={pkg.isWhatsapp ? 'https://wa.me/529837534870?text=Hola%20Hilda%2C%20quisiera%20asesor%C3%ADa%20para%20elegir%20el%20mejor%20masaje%20para%20m%C3%AD.' : (lang === 'es' ? `/agendar?service=${pkg.id}` : `/en/agendar?service=${pkg.id}`)}
+							href={pkg.isWhatsapp ? `https://wa.me/${WHATSAPP_NUMBER}?text=Hola%20Respiro%20Silvestre%2C%20quisiera%20asesor%C3%ADa%20para%20elegir%20el%20mejor%20ritual%20para%20m%C3%AD.` : (lang === 'es' ? `/agendar?service=${pkg.id}` : `/en/agendar?service=${pkg.id}`)}
 							target={pkg.isWhatsapp ? "_blank" : "_self"}
 							rel={pkg.isWhatsapp ? "noopener noreferrer" : ""}
 							class={`w-full flex items-center justify-center gap-2 font-semibold py-3 px-6 rounded-full transition-colors text-center ${
-								pkg.bestValue ? 'bg-teal-500 hover:bg-teal-400 text-white shadow-lg' : 
-								pkg.isWhatsapp ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg' : 
-								'bg-slate-100 hover:bg-slate-200 text-slate-800'
+								pkg.bestValue ? 'bg-jungle-light hover:bg-jungle text-white shadow-lg' : 
+								pkg.isWhatsapp ? 'bg-earth hover:bg-earth-dark text-white shadow-lg' : 
+								'bg-sand/60 hover:bg-sand-dark/60 text-jungle-dark'
 							}`}
 						>
 							{pkg.isWhatsapp && <MessageCircle class="w-5 h-5" />}

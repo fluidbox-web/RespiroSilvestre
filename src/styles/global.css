@@ -1,2 +1,18 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+
+@theme {
+  --color-jungle: #2d5a27;
+  --color-jungle-light: #3d7a35;
+  --color-jungle-dark: #1d3a17;
+  --color-sand: #e5d3b3;
+  --color-sand-light: #f0e6d6;
+  --color-sand-dark: #c9b08e;
+  --color-earth: #b07d62;
+  --color-earth-light: #c99a80;
+  --color-earth-dark: #8a5e45;
+}
+
+html {
+  scroll-behavior: smooth;
+}

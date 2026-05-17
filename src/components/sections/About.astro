@@ -1,43 +1,45 @@
 ---
+import { Image } from 'astro:assets';
 import { useTranslations } from '../../i18n/utils';
 import type { ui } from '../../i18n/ui';
-import { Award, HeartHandshake, Users } from 'lucide-astro';
+import { Award, HeartHandshake, Users } from '@lucide/astro';
+import profileImage from '../../assets/profile/profile.jpg';
 
 interface Props { lang: keyof typeof ui; }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
-<section class="py-20 md:py-25 px-6 sm:px-10 bg-slate-50">
+<section class="py-20 md:py-25 px-6 sm:px-10 bg-sand/90">
 	<div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12" id="about-content">
 		<div class="w-full md:w-1/2">
 			<div class="w-full aspect-[4/5] rounded-3xl overflow-hidden relative shadow-xl">
-				<img src="/assets/profile/profile.jpg" alt={t('home.about.image_alt')} class="w-full h-full object-cover" />
+				<Image src={profileImage} alt={t('home.about.image_alt')} class="w-full h-full object-cover" loading="lazy" />
 			</div>
 		</div>
 		<div class="w-full md:w-1/2">
-			<h2 class="text-teal-600 font-semibold tracking-wider uppercase mb-2">{t('home.about.title')}</h2>
-			<h3 class="text-3xl md:text-4xl font-bold text-slate-900 mb-6">{t('home.about.name')}</h3>
-			<p class="text-lg text-slate-600 mb-8 leading-relaxed">
+			<h2 class="text-jungle font-semibold tracking-wider uppercase mb-2">{t('home.about.title')}</h2>
+			<h3 class="text-3xl md:text-4xl font-bold text-jungle-dark mb-6">{t('home.about.name')}</h3>
+			<p class="text-lg text-jungle-dark/70 mb-8 leading-relaxed">
 				{t('home.about.bio')}
 			</p>
 			<div class="flex flex-col gap-4">
-				<div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-					<div class="w-14 h-14 bg-teal-50 rounded-full flex-shrink-0 flex items-center justify-center text-teal-600 p-2">
+				<div class="bg-white/80 p-5 rounded-2xl shadow-sm border border-sand-dark/20 flex items-center gap-4 hover:shadow-md transition-shadow">
+					<div class="w-14 h-14 bg-jungle/10 rounded-full flex-shrink-0 flex items-center justify-center text-jungle p-2">
 						<Award class="w-7 h-7" />
 					</div>
-					<p class="font-medium text-slate-800 text-lg">{t('home.about.certifications')}</p>
+					<p class="font-medium text-jungle-dark text-lg">{t('home.about.certifications')}</p>
 				</div>
-				<div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-					<div class="w-14 h-14 bg-teal-50 rounded-full flex-shrink-0 flex items-center justify-center text-teal-600 p-2">
+				<div class="bg-white/80 p-5 rounded-2xl shadow-sm border border-sand-dark/20 flex items-center gap-4 hover:shadow-md transition-shadow">
+					<div class="w-14 h-14 bg-jungle/10 rounded-full flex-shrink-0 flex items-center justify-center text-jungle p-2">
 						<HeartHandshake class="w-7 h-7" />
 					</div>
-					<p class="font-medium text-slate-800 text-lg">{t('home.about.experience')}</p>
+					<p class="font-medium text-jungle-dark text-lg">{t('home.about.experience')}</p>
 				</div>
-				<div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-					<div class="w-14 h-14 bg-teal-50 rounded-full flex-shrink-0 flex items-center justify-center text-teal-600 p-2">
+				<div class="bg-white/80 p-5 rounded-2xl shadow-sm border border-sand-dark/20 flex items-center gap-4 hover:shadow-md transition-shadow">
+					<div class="w-14 h-14 bg-jungle/10 rounded-full flex-shrink-0 flex items-center justify-center text-jungle p-2">
 						<Users class="w-7 h-7" />
 					</div>
-					<p class="font-medium text-slate-800 text-lg">{t('home.about.clients')}</p>
+					<p class="font-medium text-jungle-dark text-lg">{t('home.about.clients')}</p>
 				</div>
 			</div>
 		</div>
