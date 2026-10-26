@@ -34,15 +34,17 @@ if (lang === 'en' && currentPath.startsWith('/en')) {
 		</div>
 
 		<!-- Mobile Menu Button -->
-		<button id="mobile-menu-btn" aria-label="Abrir menú" class="md:hidden z-20 relative p-2 text-jungle-dark/80 hover:text-jungle focus:outline-none">
+		<button id="mobile-menu-btn" aria-label="Abrir menú" aria-controls="mobile-menu" aria-expanded="false" class="md:hidden z-20 relative p-2 text-jungle-dark/80 hover:text-jungle focus:outline-none">
 			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
 			</svg>
 		</button>
 	</div>
 
+	</header>
+
 	<!-- Mobile Navigation Menu -->
-	<div id="mobile-menu" class="fixed inset-0 bg-sand/98 z-10 transform translate-x-full transition-transform duration-300 ease-in-out md:hidden flex flex-col pt-24 px-6 shadow-2xl">
+	<div id="mobile-menu" class="mobile-menu-panel" aria-hidden="true" inert>
 		<nav class="flex flex-col gap-6 text-xl items-center">
 			<a href={translatePath('/')} class="mobile-link text-jungle-dark hover:text-jungle font-medium">{t('nav.home')}</a>
 			<a href={translatePath('/blog')} class="mobile-link text-jungle-dark hover:text-jungle font-medium">{t('nav.blog')}</a>
@@ -50,38 +52,50 @@ if (lang === 'en' && currentPath.startsWith('/en')) {
 				{t('nav.book')}
 			</a>
 		</nav>
-		<div class="mt-12 flex items-center justify-center gap-4">
+		<div class="mobile-language mt-12 flex items-center justify-center gap-4">
 			<a href={translatePath(currentPath, 'es')} class={`text-lg font-bold px-6 py-2 rounded-lg ${lang === 'es' ? 'bg-jungle/10 text-jungle' : 'text-jungle-dark/60 border border-sand-dark/30'}`}>ES</a>
 			<a href={translatePath(currentPath, 'en')} class={`text-lg font-bold px-6 py-2 rounded-lg ${lang === 'en' ? 'bg-jungle/10 text-jungle' : 'text-jungle-dark/60 border border-sand-dark/30'}`}>EN</a>
 		</div>
 	</div>
-</header>
 
 <script>
 	const btn = document.getElementById('mobile-menu-btn');
 	const menu = document.getElementById('mobile-menu');
 	
 	if (btn && menu) {
-		btn.addEventListener('click', () => {
-			const isClosed = menu.classList.contains('translate-x-full');
-			if (isClosed) {
-				menu.classList.remove('translate-x-full');
-				btn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
-				document.body.style.overflow = 'hidden';
-			} else {
-				menu.classList.add('translate-x-full');
-				btn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>`;
-				document.body.style.overflow = '';
-			}
-		});
+		const menuIcon = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>`;
+		const closeIcon = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+		const setMenuOpen = (open: boolean) => {
+			menu.classList.toggle('is-open', open);
+			menu.setAttribute('aria-hidden', String(!open));
+			menu.toggleAttribute('inert', !open);
+			btn.setAttribute('aria-expanded', String(open));
+			btn.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+			btn.innerHTML = open ? closeIcon : menuIcon;
+			document.body.style.overflow = open ? 'hidden' : '';
+			if (open) menu.querySelector<HTMLElement>('a[href]')?.focus();
+			else btn.focus();
+		};
+		btn.addEventListener('click', () => setMenuOpen(btn.getAttribute('aria-expanded') !== 'true'));
 
-		const links = menu.querySelectorAll('.mobile-link, a[href]');
+		const links = menu.querySelectorAll('a[href]');
 		links.forEach(link => {
 			link.addEventListener('click', () => {
-				menu.classList.add('translate-x-full');
-				btn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>`;
-				document.body.style.overflow = '';
+				setMenuOpen(false);
 			});
+		});
+		document.addEventListener('keydown', (event) => {
+			if (event.key === 'Escape' && menu.classList.contains('is-open')) setMenuOpen(false);
 		});
 	}
 </script>
+
+<style>
+	.mobile-menu-panel { position: fixed; inset: 4rem 0 0; z-index: 60; box-sizing: border-box; width: 100vw; height: calc(100dvh - 4rem); overflow-y: auto; padding: 3rem 1.5rem calc(2rem + env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; background: rgba(229, 211, 179, .98); box-shadow: 0 20px 40px rgba(29, 58, 23, .18); transform: translateX(100%); visibility: hidden; transition: transform .28s ease, visibility .28s ease; }
+	.mobile-menu-panel.is-open { transform: translateX(0); visibility: visible; }
+	.mobile-menu-panel nav { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; width: 100%; font-size: 1.2rem; }
+	.mobile-menu-panel nav a { width: 100%; text-align: center; }
+	.mobile-menu-panel .mobile-language { display: flex; justify-content: center; gap: 1rem; margin-top: 2rem; }
+	@media (min-width: 768px) { .mobile-menu-panel { display: none; } }
+	@media (prefers-reduced-motion: reduce) { .mobile-menu-panel { transition: none; } }
+</style>

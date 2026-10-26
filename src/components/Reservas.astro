@@ -1,0 +1,546 @@
+---
+interface Props {
+  lang?: 'es' | 'en';
+}
+
+const { lang = 'es' } = Astro.props;
+---
+
+<section class="booking-shell" data-lang={lang} aria-labelledby="booking-title">
+  <div class="booking-heading">
+    <p class="booking-eyebrow">Respiro Silvestre</p>
+    <h1 id="booking-title">{lang === 'es' ? 'Agenda tu sesión' : 'Book your session'}</h1>
+    <p>{lang === 'es' ? 'Elige tu servicio y encuentra el horario que mejor te funcione.' : 'Choose your service and find a time that works for you.'}</p>
+  </div>
+
+  <div class="booking-card" aria-busy="true">
+    <ol class="booking-progress" aria-label={lang === 'es' ? 'Progreso de reserva' : 'Booking progress'}></ol>
+    <div class="booking-progress-mobile" role="group" aria-label={lang === 'es' ? 'Progreso de reserva' : 'Booking progress'}>
+      <div class="booking-progress-mobile-label"><strong></strong><span></span></div>
+      <div class="booking-progress-track"><span></span></div>
+    </div>
+    <div class="booking-status" role="status" aria-live="polite">{lang === 'es' ? 'Cargando servicios…' : 'Loading services…'}</div>
+    <div class="booking-step" tabindex="-1"></div>
+    <p class="booking-error" role="status" aria-live="polite" hidden></p>
+    <div class="booking-actions" hidden>
+      <button type="button" class="booking-back">{lang === 'es' ? 'Atrás' : 'Back'}</button>
+      <button type="button" class="booking-next" disabled>{lang === 'es' ? 'Siguiente' : 'Next'}</button>
+    </div>
+  </div>
+</section>
+
+<script>
+  type CustomField = { key: string; label: string; tipo: string; requerido?: boolean; opciones?: string[] };
+  type Service = { id: string; nombre: string; descripcion?: string; duracion_minutos: number; precio: number; color?: string; custom_fields?: CustomField[] };
+  type Config = { timezone: string; hoy: string; fecha_max: string; campos_personalizados?: CustomField[]; servicios: Service[] };
+  type Slot = { iso: string; label: string };
+
+  const root = document.querySelector<HTMLElement>('.booking-shell');
+  if (root) {
+    const card = root.querySelector<HTMLElement>('.booking-card')!;
+    const progress = root.querySelector<HTMLOListElement>('.booking-progress')!;
+    const status = root.querySelector<HTMLElement>('.booking-status')!;
+    const stepPanel = root.querySelector<HTMLElement>('.booking-step')!;
+    const errorPanel = root.querySelector<HTMLElement>('.booking-error')!;
+    const actions = root.querySelector<HTMLElement>('.booking-actions')!;
+    const backButton = root.querySelector<HTMLButtonElement>('.booking-back')!;
+    const nextButton = root.querySelector<HTMLButtonElement>('.booking-next')!;
+    const lang = root.dataset.lang === 'en' ? 'en' : 'es';
+    const copy = lang === 'es' ? {
+      loading: 'Cargando servicios…', loadingAvailability: 'Buscando horarios…', noServices: 'Sin servicios disponibles',
+      steps: ['Servicio', 'Modalidad', 'Fecha y horario', 'Tus datos', 'Confirmación'],
+      chooseService: 'Elige el servicio que quieres reservar.', chooseMode: '¿Dónde prefieres recibir tu sesión?', atHome: 'A domicilio', atLocal: 'En el local',
+      date: 'Elige una fecha', time: 'Horarios disponibles', noSlots: 'Sin horarios ese día', selectTime: 'Selecciona un horario para continuar.',
+      name: 'Nombre completo', phone: 'WhatsApp', namePlaceholder: 'Ej. Ana Pérez', phonePlaceholder: 'Solo números, 8 a 15 dígitos',
+      summary: 'Resumen de tu reserva', duration: 'Duración', price: 'Precio', dateLabel: 'Fecha', timeLabel: 'Hora', serviceLabel: 'Servicio', modeLabel: 'Modalidad',
+      confirmIntro: 'Revisa los datos antes de enviar tu solicitud.', reserve: 'Reservar', sending: 'Enviando…', success: '¡Solicitud enviada! Te confirmaremos por WhatsApp.', another: 'Agendar otra',
+      noModeField: 'La API no ofrece un campo personalizado para guardar la modalidad. La elección se mostrará en este resumen, pero no quedará asociada a la reserva hasta configurar ese campo en la API.',
+      chooseModeError: 'Selecciona una modalidad para continuar.', invalidName: 'Escribe un nombre de 2 a 120 caracteres.', invalidPhone: 'Escribe un WhatsApp de 8 a 15 dígitos.',
+      occupied: 'Ese horario ya se ocupó. Elige otro.', generic: 'No se pudo completar la solicitud. Inténtalo de nuevo.', unavailable: 'No se pudo cargar la disponibilidad.',
+      yes: 'Sí', required: 'requerido', optional: 'opcional', choose: 'Selecciona una opción', unavailableServices: 'No fue posible cargar los servicios. Intenta recargar la página.',
+      configuration: 'La API de reservas no está configurada. Revisa PUBLIC_RESERVAS_ENDPOINT y PUBLIC_SITE_TOKEN.',
+      confirmation: 'Confirmación', edit: 'Puedes volver atrás para cambiar cualquier dato.'
+    } : {
+      loading: 'Loading services…', loadingAvailability: 'Searching for times…', noServices: 'No services available',
+      steps: ['Service', 'Location', 'Date and time', 'Your details', 'Confirmation'],
+      chooseService: 'Choose the service you would like to book.', chooseMode: 'Where would you like your session?', atHome: 'At home', atLocal: 'At the studio',
+      date: 'Choose a date', time: 'Available times', noSlots: 'No times available that day', selectTime: 'Select a time to continue.',
+      name: 'Full name', phone: 'WhatsApp', namePlaceholder: 'e.g. Ana Pérez', phonePlaceholder: 'Digits only, 8 to 15 digits',
+      summary: 'Booking summary', duration: 'Duration', price: 'Price', dateLabel: 'Date', timeLabel: 'Time', serviceLabel: 'Service', modeLabel: 'Location',
+      confirmIntro: 'Review your details before sending your request.', reserve: 'Book now', sending: 'Sending…', success: 'Request sent! We’ll confirm with you on WhatsApp.', another: 'Book another',
+      noModeField: 'The API does not provide a custom field to save the location. Your choice appears in this summary, but will not be attached to the booking until that field is configured in the API.',
+      chooseModeError: 'Choose a location to continue.', invalidName: 'Enter a name between 2 and 120 characters.', invalidPhone: 'Enter a WhatsApp number with 8 to 15 digits.',
+      occupied: 'That time was just booked. Please choose another.', generic: 'We could not complete your request. Please try again.', unavailable: 'Could not load availability.',
+      yes: 'Yes', required: 'required', optional: 'optional', choose: 'Choose an option', unavailableServices: 'Could not load services. Please reload the page.',
+      configuration: 'The booking API is not configured. Check PUBLIC_RESERVAS_ENDPOINT and PUBLIC_SITE_TOKEN.',
+      confirmation: 'Confirmation', edit: 'Go back to change any details.'
+    };
+
+    const endpoint = import.meta.env.PUBLIC_RESERVAS_ENDPOINT as string | undefined;
+    const siteToken = import.meta.env.PUBLIC_SITE_TOKEN as string | undefined;
+    let config: Config | null = null;
+    let currentStep = 0;
+    let selectedService: Service | null = null;
+    let mode = '';
+    let selectedDate = '';
+    let selectedSlot: Slot | null = null;
+    let slots: Slot[] = [];
+    let loadingSlots = false;
+    let submitting = false;
+    let succeeded = false;
+    let customValues: Record<string, string | number> = {};
+    let customerName = '';
+    let customerPhone = '';
+    let requestVersion = 0;
+
+    const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!));
+    const apiUrl = (path = '') => `${endpoint!.replace(/\/$/, '')}${path}`;
+    const tokenQuery = () => `site_token=${encodeURIComponent(siteToken!)}`;
+    const currentFields = (): CustomField[] => {
+      if (!config) return [];
+      const merged = new Map<string, CustomField>();
+      for (const field of config.campos_personalizados || []) merged.set(field.key, field);
+      for (const field of selectedService?.custom_fields || []) merged.set(field.key, field);
+      return [...merged.values()];
+    };
+    const modeField = () => currentFields().find((field) => /^(modalidad|ubicacion|location|booking_location|tipo_lugar)$/i.test(field.key) && field.tipo === 'opciones');
+    const modeOption = (kind: 'home' | 'local') => {
+      const options = modeField()?.opciones || [];
+      return options.find((option) => kind === 'home' ? /domicilio|casa|home/i.test(option) : /local|estudio|sal[oó]n|studio|business/i.test(option));
+    };
+    const dateLabel = (date: string) => {
+      if (!config || !date) return '';
+      const [year, month, day] = date.split('-').map(Number);
+      const formatter = new Intl.DateTimeFormat(lang === 'es' ? 'es-MX' : 'en-US', { dateStyle: 'full', timeZone: config.timezone });
+      let instant = Date.UTC(year, month - 1, day, 12);
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: config.timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(instant)).map((part) => [part.type, part.value]));
+        const shown = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day));
+        const target = Date.UTC(year, month - 1, day);
+        if (shown === target) break;
+        instant += target - shown;
+      }
+      return formatter.format(new Date(instant));
+    };
+    const formatPrice = (price: number) => price > 0 ? `$${new Intl.NumberFormat(lang === 'es' ? 'es-MX' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price)} MXN` : (lang === 'es' ? 'Consultar' : 'Ask us');
+    const formatDuration = (minutes: number) => `${minutes} ${lang === 'es' ? 'min' : 'min'}`;
+    const renderSummary = () => `<dl class="booking-summary">
+      <div><dt>${copy.serviceLabel}</dt><dd>${escapeHtml(selectedService?.nombre)}</dd></div>
+      <div><dt>${copy.duration}</dt><dd>${escapeHtml(formatDuration(selectedService?.duracion_minutos || 0))}</dd></div>
+      <div><dt>${copy.price}</dt><dd>${escapeHtml(formatPrice(selectedService?.precio || 0))}</dd></div>
+      <div><dt>${copy.modeLabel}</dt><dd>${escapeHtml(mode === 'home' ? copy.atHome : copy.atLocal)}</dd></div>
+      <div><dt>${copy.dateLabel}</dt><dd>${escapeHtml(dateLabel(selectedDate))}</dd></div>
+      <div><dt>${copy.timeLabel}</dt><dd>${escapeHtml(selectedSlot?.label)}</dd></div>
+    </dl>`;
+
+    function setError(message = '') {
+      errorPanel.textContent = message;
+      errorPanel.hidden = !message;
+    }
+
+    function validStep() {
+      if (currentStep === 0) return !!selectedService;
+      if (currentStep === 1) return !!mode;
+      if (currentStep === 2) return !!selectedDate && !!selectedSlot && !loadingSlots;
+      if (currentStep === 3) {
+        const name = stepPanel.querySelector<HTMLInputElement>('[name="cliente_nombre"]')?.value.trim() || '';
+        const phone = stepPanel.querySelector<HTMLInputElement>('[name="cliente_telefono"]')?.value.replace(/\D/g, '') || '';
+        if (name.length < 2 || name.length > 120 || phone.length < 8 || phone.length > 15) return false;
+        return currentFields().filter((field) => field.key !== modeField()?.key).every((field) => !field.requerido || String(customValues[field.key] ?? '').trim() !== '');
+      }
+      return currentStep === 4;
+    }
+
+    function updateActions() {
+      actions.hidden = succeeded || !config;
+      backButton.hidden = currentStep === 0;
+      nextButton.hidden = currentStep === 4 || succeeded;
+      nextButton.disabled = !validStep();
+      nextButton.textContent = currentStep === 3 ? copy.confirmation : (lang === 'es' ? 'Siguiente' : 'Next');
+      if (currentStep === 4 && !succeeded) {
+        actions.hidden = false;
+        nextButton.hidden = false;
+        nextButton.disabled = submitting;
+        nextButton.textContent = submitting ? copy.sending : copy.reserve;
+      }
+      progress.querySelectorAll('li').forEach((item, index) => {
+        item.classList.toggle('is-current', index === currentStep);
+        item.classList.toggle('is-complete', index < currentStep || succeeded);
+        item.setAttribute('aria-current', index === currentStep ? 'step' : 'false');
+      });
+      const mobileProgress = root.querySelector<HTMLElement>('.booking-progress-mobile')!;
+      const mobileLabel = mobileProgress.querySelector<HTMLElement>('strong')!;
+      const mobileCounter = mobileProgress.querySelector<HTMLElement>('span')!;
+      const mobileTrack = mobileProgress.querySelector<HTMLElement>('.booking-progress-track')!;
+      const mobileFill = mobileTrack.querySelector<HTMLElement>('span')!;
+      mobileLabel.textContent = succeeded ? copy.success : copy.steps[currentStep];
+      mobileCounter.textContent = `${lang === 'es' ? 'Paso' : 'Step'} ${Math.min(currentStep + 1, 5)} ${lang === 'es' ? 'de' : 'of'} 5`;
+      mobileTrack.setAttribute('role', 'progressbar');
+      mobileTrack.setAttribute('aria-valuemin', '1');
+      mobileTrack.setAttribute('aria-valuemax', '5');
+      mobileTrack.setAttribute('aria-valuenow', String(succeeded ? 5 : currentStep + 1));
+      mobileTrack.setAttribute('aria-valuetext', `${mobileCounter.textContent}: ${mobileLabel.textContent}`);
+      mobileFill.style.width = `${succeeded ? 100 : ((currentStep + 1) / 5) * 100}%`;
+    }
+
+    function renderStep() {
+      if (!config) return;
+      setError();
+      status.textContent = '';
+      progress.innerHTML = copy.steps.map((label, index) => `<li><span>${index + 1}</span><small>${escapeHtml(label)}</small></li>`).join('');
+
+      if (succeeded) {
+        stepPanel.innerHTML = `<div class="booking-success"><div class="booking-check" aria-hidden="true">✓</div><h2>${copy.success}</h2>${renderSummary()}<button type="button" class="booking-again">${copy.another}</button></div>`;
+        stepPanel.querySelector<HTMLButtonElement>('.booking-again')!.addEventListener('click', resetWizard);
+        updateActions();
+        return;
+      }
+
+      if (currentStep === 0) {
+        stepPanel.innerHTML = `<h2>${copy.steps[0]}</h2><p class="booking-hint">${copy.chooseService}</p>${config.servicios.length ? `<div class="service-grid">${config.servicios.map((service) => `<button type="button" class="service-option ${selectedService?.id === service.id ? 'is-selected' : ''}" data-service-id="${escapeHtml(service.id)}" aria-pressed="${selectedService?.id === service.id}"><span class="service-title">${escapeHtml(service.nombre)}</span><span class="service-description">${escapeHtml(service.descripcion || '')}</span><span class="service-meta">${escapeHtml(formatDuration(service.duracion_minutos))}${service.precio > 0 ? ` · ${escapeHtml(formatPrice(service.precio))}` : ''}</span></button>`).join('')}</div>` : `<p class="booking-empty">${copy.noServices}</p>`}`;
+        stepPanel.querySelectorAll<HTMLButtonElement>('[data-service-id]').forEach((button) => button.addEventListener('click', () => {
+          selectedService = config!.servicios.find((service) => service.id === button.dataset.serviceId) || null;
+          customValues = {};
+          selectedSlot = null;
+          slots = [];
+          renderStep();
+        }));
+      } else if (currentStep === 1) {
+        const homeOpt = modeOption('home');
+        const localOpt = modeOption('local');
+        const noMapping = !homeOpt || !localOpt;
+        stepPanel.innerHTML = `<h2>${copy.steps[1]}</h2><p class="booking-hint">${copy.chooseMode}</p><div class="mode-grid"><button type="button" class="mode-option ${mode === 'home' ? 'is-selected' : ''}" data-mode="home" aria-pressed="${mode === 'home'}"><span class="mode-icon" aria-hidden="true">⌂</span><strong>${copy.atHome}</strong></button><button type="button" class="mode-option ${mode === 'local' ? 'is-selected' : ''}" data-mode="local" aria-pressed="${mode === 'local'}"><span class="mode-icon" aria-hidden="true">⌖</span><strong>${copy.atLocal}</strong></button></div>${noMapping ? `<p class="booking-config-note">${copy.noModeField}</p>` : ''}`;
+        stepPanel.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => {
+          mode = button.dataset.mode || '';
+          selectedSlot = null;
+          slots = [];
+          renderStep();
+        }));
+      } else if (currentStep === 2) {
+        stepPanel.innerHTML = `<h2>${copy.steps[2]}</h2><label class="booking-label" for="booking-date">${copy.date}</label><input class="booking-input" type="date" id="booking-date" name="fecha" min="${escapeHtml(config.hoy)}" max="${escapeHtml(config.fecha_max)}" value="${escapeHtml(selectedDate || config.hoy)}" /><h3 class="booking-subheading">${copy.time}</h3><div class="slot-list" aria-live="polite"></div>`;
+        const dateInput = stepPanel.querySelector<HTMLInputElement>('#booking-date')!;
+        if (!selectedDate) selectedDate = config.hoy;
+        dateInput.addEventListener('change', () => {
+          selectedDate = dateInput.value;
+          selectedSlot = null;
+          loadAvailability();
+        });
+        renderSlots();
+        if (!slots.length && !loadingSlots) loadAvailability();
+      } else if (currentStep === 3) {
+        const fields = currentFields().filter((field) => field.key !== modeField()?.key);
+        const htmlFields = fields.map((field) => {
+          const required = field.requerido ? 'required' : '';
+          const label = `${escapeHtml(field.label)}${field.requerido ? ' *' : ''}`;
+          const value = escapeHtml(customValues[field.key] ?? '');
+          const id = `custom-${encodeURIComponent(field.key).replace(/%/g, '')}`;
+          let control = '';
+          if (field.tipo === 'opciones') control = `<select class="booking-input" id="${id}" name="custom:${escapeHtml(field.key)}" ${required}><option value="">${copy.choose}</option>${(field.opciones || []).map((option) => `<option value="${escapeHtml(option)}" ${String(customValues[field.key] ?? '') === option ? 'selected' : ''}>${escapeHtml(option)}</option>`).join('')}</select>`;
+          else if (field.tipo === 'fecha') control = `<input class="booking-input" type="date" id="${id}" name="custom:${escapeHtml(field.key)}" value="${value}" ${required}/>`;
+          else if (field.tipo === 'numero') control = `<input class="booking-input" type="number" id="${id}" name="custom:${escapeHtml(field.key)}" value="${value}" ${required}/>`;
+          else control = `<input class="booking-input" type="text" maxlength="200" id="${id}" name="custom:${escapeHtml(field.key)}" value="${value}" ${required}/>`;
+          return `<div class="booking-field"><label class="booking-label" for="${id}">${label}</label>${control}</div>`;
+        }).join('');
+        stepPanel.innerHTML = `<h2>${copy.steps[3]}</h2><div class="booking-field"><label class="booking-label" for="cliente-nombre">${copy.name} *</label><input class="booking-input" id="cliente-nombre" name="cliente_nombre" type="text" minlength="2" maxlength="120" required autocomplete="name" placeholder="${copy.namePlaceholder}"/></div><div class="booking-field"><label class="booking-label" for="cliente-telefono">${copy.phone} *</label><input class="booking-input" id="cliente-telefono" name="cliente_telefono" type="tel" inputmode="numeric" pattern="[0-9]{8,15}" minlength="8" maxlength="15" required autocomplete="tel" placeholder="${copy.phonePlaceholder}"/></div>${htmlFields}<div class="booking-field booking-honeypot" aria-hidden="true"><label for="booking-website">Website</label><input id="booking-website" name="website" type="text" tabindex="-1" autocomplete="off" value=""/></div><div class="booking-summary-wrap"><h3>${copy.summary}</h3>${renderSummary()}</div>`;
+        stepPanel.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[name]').forEach((input) => {
+          input.addEventListener('input', onDetailsInput);
+          input.addEventListener('change', onDetailsInput);
+        });
+        stepPanel.querySelector<HTMLInputElement>('[name="cliente_nombre"]')!.value = customerName;
+        stepPanel.querySelector<HTMLInputElement>('[name="cliente_telefono"]')!.value = customerPhone;
+        for (const field of fields) {
+          const input = stepPanel.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="custom:${CSS.escape(field.key)}"]`);
+          if (input) input.value = String(customValues[field.key] ?? '');
+        }
+      } else {
+        stepPanel.innerHTML = `<h2>${copy.confirmation}</h2><p class="booking-hint">${copy.confirmIntro}</p>${renderSummary()}<div class="booking-confirm-contact"><p><strong>${escapeHtml(customerName)}</strong></p><p>${escapeHtml(customerPhone)}</p></div><p class="booking-hint">${copy.edit}</p>`;
+      }
+      stepPanel.focus();
+      updateActions();
+    }
+
+    function renderSlots() {
+      const container = stepPanel.querySelector<HTMLElement>('.slot-list');
+      if (!container) return;
+      if (loadingSlots) {
+        container.innerHTML = `<p class="booking-empty">${copy.loadingAvailability}</p>`;
+        return;
+      }
+      if (!slots.length) {
+        container.innerHTML = `<p class="booking-empty">${copy.noSlots}</p>`;
+        return;
+      }
+      container.innerHTML = slots.map((slot, index) => `<button type="button" class="slot-option ${selectedSlot?.iso === slot.iso ? 'is-selected' : ''}" data-slot-index="${index}" aria-pressed="${selectedSlot?.iso === slot.iso}">${escapeHtml(slot.label)}</button>`).join('');
+      container.querySelectorAll<HTMLButtonElement>('[data-slot-index]').forEach((button) => button.addEventListener('click', () => {
+        selectedSlot = slots[Number(button.dataset.slotIndex)] || null;
+        container.querySelectorAll('.slot-option').forEach((item) => item.classList.remove('is-selected'));
+        button.classList.add('is-selected');
+        button.setAttribute('aria-pressed', 'true');
+        updateActions();
+      }));
+    }
+
+    async function loadAvailability() {
+      if (!config || currentStep !== 2) return;
+      const version = ++requestVersion;
+      if (!selectedDate) {
+        loadingSlots = false;
+        slots = [];
+        selectedSlot = null;
+        renderSlots();
+        updateActions();
+        return;
+      }
+      loadingSlots = true;
+      slots = [];
+      selectedSlot = null;
+      renderSlots();
+      updateActions();
+      try {
+        const url = `${apiUrl('/disponibilidad')}?${tokenQuery()}&servicio_id=${encodeURIComponent(selectedService?.id || '')}&fecha=${encodeURIComponent(selectedDate)}`;
+        const response = await fetch(url);
+        const result = await response.json();
+        if (!response.ok || !result.ok) throw new Error(result.error || copy.unavailable);
+        if (version !== requestVersion) return;
+        const timezone = result.data.timezone || config.timezone;
+        const formatter = new Intl.DateTimeFormat('es-MX', { timeZone: timezone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+        slots = (result.data.slots || []).map((iso: string) => ({ iso, label: formatter.format(new Date(iso)) }));
+      } catch (error) {
+        if (version === requestVersion) setError(error instanceof Error ? error.message : copy.unavailable);
+      } finally {
+        if (version === requestVersion) {
+          loadingSlots = false;
+          renderSlots();
+          updateActions();
+        }
+      }
+    }
+
+    function onDetailsInput(event: Event) {
+      const input = event.currentTarget as HTMLInputElement | HTMLSelectElement;
+      if (input.name === 'cliente_nombre') customerName = input.value.trim();
+      else if (input.name === 'cliente_telefono') customerPhone = input.value.replace(/\D/g, '');
+      else if (input.name.startsWith('custom:')) customValues[input.name.slice(7)] = input.value;
+      updateActions();
+    }
+
+    function collectCustomData() {
+      const data: Record<string, string | number> = {};
+      for (const field of currentFields().filter((field) => field.key !== modeField()?.key)) {
+        const value = customValues[field.key];
+        if (value === undefined || value === '') continue;
+        data[field.key] = field.tipo === 'numero' ? Number(value) : String(value);
+      }
+      const locationField = modeField();
+      const locationValue = modeOption(mode === 'home' ? 'home' : 'local');
+      if (locationField && locationValue) data[locationField.key] = locationValue;
+      return data;
+    }
+
+    async function submitBooking() {
+      const name = customerName.trim();
+      const phone = customerPhone.replace(/\D/g, '');
+      if (name.length < 2 || name.length > 120) return setError(copy.invalidName);
+      if (!/^\d{8,15}$/.test(phone)) return setError(copy.invalidPhone);
+      if (!selectedDate || !selectedSlot) return setError(copy.selectTime);
+      submitting = true;
+      setError();
+      updateActions();
+      try {
+        const payload = {
+          site_token: siteToken,
+          servicio_id: selectedService?.id || null,
+          fecha: selectedDate,
+          hora: selectedSlot.label,
+          cliente_nombre: name,
+          cliente_telefono: phone,
+          datos: collectCustomData(),
+          website: ''
+        };
+        const response = await fetch(apiUrl(), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const result = await response.json();
+        if (!response.ok || !result.ok) {
+          if (response.status === 409) {
+            selectedSlot = null;
+            currentStep = 2;
+            renderStep();
+            throw new Error(copy.occupied);
+          }
+          throw new Error(result.error || copy.generic);
+        }
+        succeeded = true;
+        renderStep();
+      } catch (error) {
+        setError(error instanceof Error ? error.message : copy.generic);
+      } finally {
+        submitting = false;
+        updateActions();
+      }
+    }
+
+    function resetWizard() {
+      currentStep = 0;
+      selectedService = null;
+      mode = '';
+      selectedDate = config?.hoy || '';
+      selectedSlot = null;
+      slots = [];
+      succeeded = false;
+      customValues = {};
+      customerName = '';
+      customerPhone = '';
+      renderStep();
+    }
+
+    backButton.addEventListener('click', () => {
+      if (currentStep > 0) {
+        currentStep--;
+        renderStep();
+      }
+    });
+    nextButton.addEventListener('click', async () => {
+      if (!validStep()) {
+        if (currentStep === 1 && !mode) setError(copy.chooseModeError);
+        else if (currentStep === 2) setError(copy.selectTime);
+        return;
+      }
+      if (currentStep === 4) return submitBooking();
+      currentStep++;
+      renderStep();
+    });
+
+    async function initialize() {
+      if (!endpoint || !siteToken) {
+        setError(copy.configuration);
+        card.setAttribute('aria-busy', 'false');
+        return;
+      }
+      try {
+        const response = await fetch(`${apiUrl()}?${tokenQuery()}`);
+        const result = await response.json();
+        if (!response.ok || !result.ok) throw new Error(result.error || copy.unavailableServices);
+        config = result.data as Config;
+        const requestedService = new URLSearchParams(window.location.search).get('service');
+        if (requestedService) selectedService = config.servicios.find((service) => service.id === requestedService) || null;
+        status.textContent = '';
+        card.setAttribute('aria-busy', 'false');
+        renderStep();
+      } catch (error) {
+        setError(error instanceof Error ? error.message : copy.unavailableServices);
+        card.setAttribute('aria-busy', 'false');
+      }
+    }
+    initialize();
+  }
+</script>
+
+<style is:global>
+  .booking-shell { --booking-green: #2d5a27; --booking-dark: #1d3a17; --booking-earth: #b07d62; --booking-cream: #f0e6d6; --booking-line: #c9b08e; width: 100%; max-width: 980px; box-sizing: border-box; margin: 0 auto; padding: 2.75rem 1rem 4rem; color: var(--booking-dark); }
+  .booking-heading { text-align: center; margin: 0 auto 1.8rem; max-width: 720px; }
+  .booking-eyebrow { color: var(--booking-earth); font-weight: 700; letter-spacing: .15em; text-transform: uppercase; font-size: .75rem; }
+  .booking-heading h1 { font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.1; margin: .6rem 0; }
+  .booking-heading > p:last-child, .booking-hint { color: #536458; }
+  .booking-card { width: 100%; box-sizing: border-box; background: rgba(255,255,255,.96); border: 1px solid rgba(201,176,142,.55); border-radius: 1.5rem; box-shadow: 0 20px 55px rgba(29,58,23,.12); padding: clamp(1.25rem, 4vw, 2.5rem); }
+  .booking-progress { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); list-style: none; gap: .35rem; padding: 0 0 1.5rem; margin: 0 0 1.5rem; border-bottom: 1px solid var(--booking-line); }
+  .booking-progress li { display: flex; flex-direction: column; align-items: center; gap: .45rem; color: #77847a; text-align: center; }
+  .booking-progress li span { width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; border: 1px solid #c9d0c9; font-weight: 700; background: white; }
+  .booking-progress li small { font-size: clamp(.58rem, 1.7vw, .77rem); line-height: 1.2; }
+  .booking-progress li.is-current { color: var(--booking-green); font-weight: 700; }
+  .booking-progress li.is-current span, .booking-progress li.is-complete span { background: var(--booking-green); color: white; border-color: var(--booking-green); }
+  .booking-progress-mobile { display: none; }
+  .booking-step { min-height: 220px; outline: none; scroll-margin-top: 5.75rem; }
+  .booking-step h2 { font-size: 1.55rem; margin: 0 0 .5rem; }
+  .booking-step h3 { font-size: 1.05rem; }
+  .booking-hint { margin: 0 0 1.2rem; }
+  .service-grid, .mode-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,250px),1fr)); gap: .85rem; margin-top: 1.25rem; }
+  .service-option, .mode-option, .slot-option { color: inherit; background: white; border: 1px solid rgba(201,176,142,.75); border-radius: 1rem; cursor: pointer; text-align: left; transition: border-color .15s, background .15s, box-shadow .15s, transform .15s; font: inherit; }
+  .service-option { padding: 1.1rem 1.2rem; display: flex; flex-direction: column; gap: .55rem; }
+  .service-title { font-size: 1.08rem; font-weight: 700; }
+  .service-description { font-size: .92rem; color: #58665c; }
+  .service-meta { color: var(--booking-green); font-size: .9rem; font-weight: 700; margin-top: .2rem; }
+  .mode-option { min-height: 130px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: .75rem; font-size: 1.05rem; }
+  .mode-icon { color: var(--booking-earth); font-size: 2rem; }
+  .service-option:hover, .mode-option:hover, .slot-option:hover { border-color: var(--booking-green); transform: translateY(-1px); }
+  .service-option.is-selected, .mode-option.is-selected, .slot-option.is-selected { border: 2px solid var(--booking-green); background: #f0f5ef; box-shadow: 0 0 0 3px rgba(45,90,39,.1); }
+  .booking-label { display: block; font-weight: 650; margin: 1rem 0 .4rem; }
+  .booking-input { display: block; width: 100%; min-height: 48px; border: 1px solid #cfcabb; border-radius: .7rem; background: white; padding: .7rem .85rem; color: var(--booking-dark); }
+  .booking-input:focus-visible, .service-option:focus-visible, .mode-option:focus-visible, .slot-option:focus-visible, .booking-actions button:focus-visible, .booking-again:focus-visible { outline: 3px solid #8a5e45; outline-offset: 3px; }
+  .booking-subheading { margin: 1.5rem 0 .65rem; }
+  .slot-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: .65rem; min-height: 48px; }
+  .slot-option { padding: .7rem 1rem; min-width: 80px; text-align: center; font-weight: 650; }
+  .booking-field { margin: 1rem 0; }
+  .booking-summary-wrap { margin-top: 1.6rem; padding-top: 1rem; border-top: 1px solid var(--booking-line); }
+  .booking-summary { background: var(--booking-cream); border-radius: 1rem; padding: .4rem 1rem; margin: .8rem 0; }
+  .booking-summary > div { display: flex; justify-content: space-between; gap: 1rem; padding: .65rem 0; border-bottom: 1px solid rgba(31,60,44,.1); }
+  .booking-summary > div:last-child { border-bottom: 0; }
+  .booking-summary dt { color: #59675d; }
+  .booking-summary dd { text-align: right; margin: 0; font-weight: 650; }
+  .booking-confirm-contact { border-left: 3px solid var(--booking-earth); padding-left: .9rem; margin: 1rem 0; }
+  .booking-confirm-contact p { margin: .2rem 0; }
+  .booking-actions { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.75rem; }
+  .booking-actions button, .booking-again { min-height: 52px; border: 0; border-radius: 999px; padding: .75rem 1.5rem; font: inherit; font-weight: 700; cursor: pointer; }
+  .booking-back { background: #eeeadd; color: var(--booking-dark); }
+  .booking-next, .booking-again { margin-left: auto; background: var(--booking-green); color: white; box-shadow: 0 5px 14px rgba(45,90,39,.2); }
+  .booking-next:not(:disabled):active, .booking-again:active { transform: scale(.98); }
+  .booking-next:disabled { opacity: .48; cursor: not-allowed; }
+  .booking-error { color: #a32929; background: #fff0ee; border-radius: .65rem; padding: .8rem 1rem; margin: 1rem 0 0; }
+  .booking-status, .booking-empty, .booking-config-note { color: #59675d; margin: 1rem 0; }
+  .booking-config-note { background: #fff8e8; border-left: 3px solid var(--booking-earth); padding: .8rem 1rem; font-size: .9rem; }
+  .booking-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .booking-success { text-align: center; padding: 1rem 0; }
+  .booking-success h2 { max-width: 600px; margin: 1rem auto; }
+  .booking-check { width: 4rem; height: 4rem; margin: auto; border-radius: 50%; display: grid; place-items: center; background: #e6f0e6; color: var(--booking-green); font-size: 2.3rem; font-weight: 700; }
+  .booking-success .booking-summary { text-align: left; }
+  [hidden] { display: none !important; }
+  @media (max-width: 700px) {
+    .booking-shell { padding: 1.8rem .75rem calc(2rem + env(safe-area-inset-bottom)); }
+    .booking-heading { margin-bottom: 1.2rem; }
+    .booking-heading h1 { font-size: clamp(1.9rem, 8vw, 2.6rem); }
+    .booking-heading > p:last-child { font-size: .98rem; line-height: 1.5; }
+    .booking-card { padding: 1.15rem; border-radius: 1.2rem; }
+    .booking-progress { display: none; }
+    .booking-progress-mobile { display: block; margin: 0 0 1.25rem; padding: 0 0 1rem; border-bottom: 1px solid rgba(201,176,142,.55); }
+    .booking-progress-mobile-label { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; margin-bottom: .65rem; }
+    .booking-progress-mobile-label strong { font-size: 1rem; color: var(--booking-dark); }
+    .booking-progress-mobile-label > span { color: #637064; font-size: .82rem; white-space: nowrap; }
+    .booking-progress-track { height: 5px; overflow: hidden; border-radius: 99px; background: #e8e0d1; }
+    .booking-progress-track > span { display: block; height: 100%; border-radius: inherit; background: var(--booking-green); transition: width .25s ease; }
+    .booking-step { min-height: 180px; scroll-margin-top: 5rem; }
+    .booking-step h2 { font-size: 1.35rem; margin-bottom: .55rem; }
+    .booking-hint { line-height: 1.5; font-size: .95rem; }
+    .service-grid { grid-template-columns: 1fr; gap: .65rem; margin-top: 1rem; }
+    .service-option { min-height: 94px; padding: 1rem; border-radius: .9rem; }
+    .service-title { font-size: 1rem; }
+    .service-description { font-size: .88rem; line-height: 1.4; }
+    .mode-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: .7rem; margin-top: 1rem; }
+    .mode-option { min-height: 112px; padding: .9rem .6rem; border-radius: .9rem; }
+    .booking-label { margin-top: .75rem; }
+    .booking-input { min-height: 52px; font-size: 16px; }
+    .booking-subheading { margin-top: 1.25rem; }
+    .slot-list { grid-template-columns: repeat(auto-fill, minmax(82px, 1fr)); gap: .55rem; }
+    .slot-option { min-height: 48px; min-width: 0; padding: .6rem .4rem; border-radius: .75rem; }
+    .booking-summary { padding: .35rem .85rem; }
+    .booking-summary > div { gap: .6rem; padding: .65rem 0; }
+    .booking-summary dt, .booking-summary dd { font-size: .9rem; }
+    .booking-summary dd { max-width: 62%; overflow-wrap: anywhere; }
+    .booking-actions { position: sticky; bottom: 0; z-index: 5; margin: 1.25rem -1.15rem -1.15rem; padding: .8rem 1.15rem calc(.8rem + env(safe-area-inset-bottom)); background: rgba(255,255,255,.97); border-top: 1px solid rgba(201,176,142,.5); border-radius: 0 0 1.15rem 1.15rem; box-shadow: 0 -8px 20px rgba(29,58,23,.06); backdrop-filter: blur(12px); }
+    .booking-actions button { min-height: 52px; flex: 1; padding-inline: .8rem; font-size: .96rem; }
+    .booking-next { flex: 1; max-width: none; }
+    .booking-back { flex: 0 0 35%; max-width: none; }
+    .booking-error { margin-top: 1rem; font-size: .93rem; line-height: 1.45; }
+    .booking-config-note { font-size: .87rem; line-height: 1.45; }
+    .booking-success .booking-summary > div { flex-direction: row; }
+    .booking-again { width: 100%; min-height: 54px; }
+  }
+  @media (max-width: 380px) {
+    .booking-shell { padding-inline: .5rem; }
+    .booking-card { padding: .95rem; }
+    .booking-actions { margin: 1.2rem -.95rem -.95rem; padding-inline: .95rem; }
+    .mode-grid { grid-template-columns: 1fr; }
+    .mode-option { min-height: 80px; flex-direction: row; }
+    .booking-progress-mobile-label strong { font-size: .94rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .booking-shell *, .booking-shell *::before, .booking-shell *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+</style>
