@@ -19,7 +19,24 @@ const { lang = 'es' } = Astro.props;
       <div class="booking-progress-mobile-label"><strong></strong><span></span></div>
       <div class="booking-progress-track"><span></span></div>
     </div>
-    <div class="booking-status" role="status" aria-live="polite">{lang === 'es' ? 'Cargando servicios…' : 'Loading services…'}</div>
+    <div class="booking-status" role="status" aria-live="polite">
+      <span class="booking-visually-hidden">{lang === 'es' ? 'Cargando servicios…' : 'Loading services…'}</span>
+      <div class="booking-skeleton" aria-hidden="true">
+        <div class="skeleton-progress"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="skeleton-title"></div>
+        <div class="skeleton-subtitle"></div>
+        <div class="skeleton-service-grid">
+          {Array.from({ length: 3 }).map(() => (
+            <div class="skeleton-service">
+              <i class="skeleton-service-title"></i>
+              <i class="skeleton-service-description"></i>
+              <i class="skeleton-service-description short"></i>
+              <i class="skeleton-service-meta"></i>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
     <div class="booking-step" tabindex="-1"></div>
     <p class="booking-error" role="status" aria-live="polite" hidden></p>
     <div class="booking-actions" hidden>
@@ -50,6 +67,7 @@ const { lang = 'es' } = Astro.props;
       loading: 'Cargando servicios…', loadingAvailability: 'Buscando horarios…', noServices: 'Sin servicios disponibles',
       steps: ['Servicio', 'Modalidad', 'Fecha y horario', 'Tus datos', 'Confirmación'],
       chooseService: 'Elige el servicio que quieres reservar.', chooseMode: '¿Dónde prefieres recibir tu sesión?', atHome: 'A domicilio', atLocal: 'En el local',
+      selectService: 'Elegir este servicio', selected: 'Servicio seleccionado',
       date: 'Elige una fecha', time: 'Horarios disponibles', noSlots: 'Sin horarios ese día', selectTime: 'Selecciona un horario para continuar.',
       name: 'Nombre completo', phone: 'WhatsApp', namePlaceholder: 'Ej. Ana Pérez', phonePlaceholder: 'Solo números, 8 a 15 dígitos',
       summary: 'Resumen de tu reserva', duration: 'Duración', price: 'Precio', dateLabel: 'Fecha', timeLabel: 'Hora', serviceLabel: 'Servicio', modeLabel: 'Modalidad',
@@ -64,6 +82,7 @@ const { lang = 'es' } = Astro.props;
       loading: 'Loading services…', loadingAvailability: 'Searching for times…', noServices: 'No services available',
       steps: ['Service', 'Location', 'Date and time', 'Your details', 'Confirmation'],
       chooseService: 'Choose the service you would like to book.', chooseMode: 'Where would you like your session?', atHome: 'At home', atLocal: 'At the studio',
+      selectService: 'Choose this service', selected: 'Service selected',
       date: 'Choose a date', time: 'Available times', noSlots: 'No times available that day', selectTime: 'Select a time to continue.',
       name: 'Full name', phone: 'WhatsApp', namePlaceholder: 'e.g. Ana Pérez', phonePlaceholder: 'Digits only, 8 to 15 digits',
       summary: 'Booking summary', duration: 'Duration', price: 'Price', dateLabel: 'Date', timeLabel: 'Time', serviceLabel: 'Service', modeLabel: 'Location',
@@ -134,6 +153,7 @@ const { lang = 'es' } = Astro.props;
     </dl>`;
 
     function setError(message = '') {
+      if (message) status.replaceChildren();
       errorPanel.textContent = message;
       errorPanel.hidden = !message;
     }
@@ -152,9 +172,9 @@ const { lang = 'es' } = Astro.props;
     }
 
     function updateActions() {
-      actions.hidden = succeeded || !config;
+      actions.hidden = succeeded || !config || currentStep === 0;
       backButton.hidden = currentStep === 0;
-      nextButton.hidden = currentStep === 4 || succeeded;
+      nextButton.hidden = currentStep === 0 || succeeded;
       nextButton.disabled = !validStep();
       nextButton.textContent = currentStep === 3 ? copy.confirmation : (lang === 'es' ? 'Siguiente' : 'Next');
       if (currentStep === 4 && !succeeded) {
@@ -197,12 +217,18 @@ const { lang = 'es' } = Astro.props;
       }
 
       if (currentStep === 0) {
-        stepPanel.innerHTML = `<h2>${copy.steps[0]}</h2><p class="booking-hint">${copy.chooseService}</p>${config.servicios.length ? `<div class="service-grid">${config.servicios.map((service) => `<button type="button" class="service-option ${selectedService?.id === service.id ? 'is-selected' : ''}" data-service-id="${escapeHtml(service.id)}" aria-pressed="${selectedService?.id === service.id}"><span class="service-title">${escapeHtml(service.nombre)}</span><span class="service-description">${escapeHtml(service.descripcion || '')}</span><span class="service-meta">${escapeHtml(formatDuration(service.duracion_minutos))}${service.precio > 0 ? ` · ${escapeHtml(formatPrice(service.precio))}` : ''}</span></button>`).join('')}</div>` : `<p class="booking-empty">${copy.noServices}</p>`}`;
+        stepPanel.innerHTML = `<h2>${copy.steps[0]}</h2><p class="booking-hint">${copy.chooseService}</p>${config.servicios.length ? `<div class="service-grid">${config.servicios.map((service) => {
+          const isSelected = selectedService?.id === service.id;
+          return `<button type="button" class="service-option ${isSelected ? 'is-selected' : ''}" data-service-id="${escapeHtml(service.id)}" aria-pressed="${isSelected}"><span class="service-title">${escapeHtml(service.nombre)}</span>${service.precio > 0 ? `<span class="service-price">${escapeHtml(formatPrice(service.precio))}</span>` : ''}<span class="service-description">${escapeHtml(service.descripcion || '')}</span><span class="service-meta">${escapeHtml(formatDuration(service.duracion_minutos))}</span><span class="service-cta">${isSelected ? copy.selected : copy.selectService}</span></button>`;
+        }).join('')}</div>` : `<p class="booking-empty">${copy.noServices}</p>`}`;
         stepPanel.querySelectorAll<HTMLButtonElement>('[data-service-id]').forEach((button) => button.addEventListener('click', () => {
           selectedService = config!.servicios.find((service) => service.id === button.dataset.serviceId) || null;
           customValues = {};
+          mode = '';
+          selectedDate = config!.hoy;
           selectedSlot = null;
           slots = [];
+          currentStep = 1;
           renderStep();
         }));
       } else if (currentStep === 1) {
@@ -435,42 +461,55 @@ const { lang = 'es' } = Astro.props;
 </script>
 
 <style is:global>
-  .booking-shell { --booking-green: #2d5a27; --booking-dark: #1d3a17; --booking-earth: #b07d62; --booking-cream: #f0e6d6; --booking-line: #c9b08e; width: 100%; max-width: 980px; box-sizing: border-box; margin: 0 auto; padding: 2.75rem 1rem 4rem; color: var(--booking-dark); }
+  .booking-shell { --booking-green: #2d5a27; --booking-green-light: #3d7a35; --booking-dark: #1d3a17; --booking-earth: #b07d62; --booking-cream: #f0e6d6; --booking-line: #c9b08e; width: 100%; max-width: 1152px; box-sizing: border-box; margin: 0 auto; padding: 2.75rem 1.5rem 4rem; color: var(--booking-dark); }
   .booking-heading { text-align: center; margin: 0 auto 1.8rem; max-width: 720px; }
   .booking-eyebrow { color: var(--booking-earth); font-weight: 700; letter-spacing: .15em; text-transform: uppercase; font-size: .75rem; }
   .booking-heading h1 { font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.1; margin: .6rem 0; }
   .booking-heading > p:last-child, .booking-hint { color: #536458; }
-  .booking-card { width: 100%; box-sizing: border-box; background: rgba(255,255,255,.96); border: 1px solid rgba(201,176,142,.55); border-radius: 1.5rem; box-shadow: 0 20px 55px rgba(29,58,23,.12); padding: clamp(1.25rem, 4vw, 2.5rem); }
+  .booking-card { width: 100%; box-sizing: border-box; background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
   .booking-progress { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); list-style: none; gap: .35rem; padding: 0 0 1.5rem; margin: 0 0 1.5rem; border-bottom: 1px solid var(--booking-line); }
   .booking-progress li { display: flex; flex-direction: column; align-items: center; gap: .45rem; color: #77847a; text-align: center; }
-  .booking-progress li span { width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; border: 1px solid #c9d0c9; font-weight: 700; background: white; }
+  .booking-progress li span { width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; border: 1px solid rgba(201,176,142,.75); font-weight: 700; background: rgba(240,230,214,.8); }
   .booking-progress li small { font-size: clamp(.58rem, 1.7vw, .77rem); line-height: 1.2; }
   .booking-progress li.is-current { color: var(--booking-green); font-weight: 700; }
   .booking-progress li.is-current span, .booking-progress li.is-complete span { background: var(--booking-green); color: white; border-color: var(--booking-green); }
   .booking-progress-mobile { display: none; }
   .booking-step { min-height: 220px; outline: none; scroll-margin-top: 5.75rem; }
-  .booking-step h2 { font-size: 1.55rem; margin: 0 0 .5rem; }
+  .booking-step h2 { font-size: 1.55rem; margin: 0 0 .5rem; color: var(--booking-dark); }
   .booking-step h3 { font-size: 1.05rem; }
   .booking-hint { margin: 0 0 1.2rem; }
   .service-grid, .mode-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,250px),1fr)); gap: .85rem; margin-top: 1.25rem; }
-  .service-option, .mode-option, .slot-option { color: inherit; background: white; border: 1px solid rgba(201,176,142,.75); border-radius: 1rem; cursor: pointer; text-align: left; transition: border-color .15s, background .15s, box-shadow .15s, transform .15s; font: inherit; }
-  .service-option { padding: 1.1rem 1.2rem; display: flex; flex-direction: column; gap: .55rem; }
-  .service-title { font-size: 1.08rem; font-weight: 700; }
-  .service-description { font-size: .92rem; color: #58665c; }
-  .service-meta { color: var(--booking-green); font-size: .9rem; font-weight: 700; margin-top: .2rem; }
-  .mode-option { min-height: 130px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: .75rem; font-size: 1.05rem; }
+  .service-option, .mode-option, .slot-option { color: inherit; background: rgba(255,255,255,.85); border: 1px solid rgba(201,176,142,.42); border-radius: 1.5rem; box-shadow: 0 2px 4px rgba(29,58,23,.08); cursor: pointer; text-align: left; transition: border-color .15s, background .15s, box-shadow .15s, transform .15s; font: inherit; }
+  .service-option { min-height: 318px; padding: 2rem; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: .8rem; text-align: center; }
+  .service-option { transition: background-color .16s ease, border-color .16s ease, color .16s ease; }
+  .service-title { font-size: 1.2rem; font-weight: 700; color: var(--booking-dark); }
+  .service-price { font-size: clamp(1.8rem, 3vw, 2.4rem); line-height: 1.05; font-weight: 800; color: var(--booking-green); }
+  .service-description { font-size: .95rem; line-height: 1.5; color: rgba(29,58,23,.72); flex-grow: 1; }
+  .service-meta { color: rgba(29,58,23,.66); font-size: .9rem; font-weight: 650; }
+  .service-cta { display: flex; width: 100%; min-height: 48px; padding: .7rem 1rem; justify-content: center; align-items: center; border-radius: 999px; background: rgba(229,211,179,.62); color: var(--booking-dark); font-size: .94rem; font-weight: 700; }
+  .mode-option { min-height: 220px; padding: 2rem; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: .75rem; font-size: 1.05rem; text-align: center; }
   .mode-icon { color: var(--booking-earth); font-size: 2rem; }
-  .service-option:hover, .mode-option:hover, .slot-option:hover { border-color: var(--booking-green); transform: translateY(-1px); }
-  .service-option.is-selected, .mode-option.is-selected, .slot-option.is-selected { border: 2px solid var(--booking-green); background: #f0f5ef; box-shadow: 0 0 0 3px rgba(45,90,39,.1); }
+  .mode-option:hover, .slot-option:hover { border-color: rgba(45,90,39,.45); box-shadow: 0 10px 22px rgba(29,58,23,.12); transform: translateY(-2px); }
+  .service-option:hover, .service-option:focus-visible { transform: none; border-color: rgba(61,122,53,.7); background: var(--booking-dark); box-shadow: none; color: #f0e6d6; }
+  .service-option.is-selected, .mode-option.is-selected { border-color: rgba(61,122,53,.7); background: var(--booking-dark); box-shadow: 0 8px 20px rgba(29,58,23,.18); color: #f0e6d6; }
+  .service-option:hover .service-title, .service-option:hover .service-description, .service-option:hover .service-meta,
+  .service-option:focus-visible .service-title, .service-option:focus-visible .service-description, .service-option:focus-visible .service-meta,
+  .service-option.is-selected .service-title, .service-option.is-selected .service-description, .service-option.is-selected .service-meta { color: rgba(240,230,214,.82); }
+  .service-option:hover .service-price, .service-option:focus-visible .service-price, .service-option.is-selected .service-price { color: white; }
+  .service-option:hover .service-cta, .service-option:focus-visible .service-cta, .service-option.is-selected .service-cta { background: var(--booking-green-light); color: white; }
+  .mode-option.is-selected { color: #f0e6d6; }
   .booking-label { display: block; font-weight: 650; margin: 1rem 0 .4rem; }
-  .booking-input { display: block; width: 100%; min-height: 48px; border: 1px solid #cfcabb; border-radius: .7rem; background: white; padding: .7rem .85rem; color: var(--booking-dark); }
+  .booking-input { display: block; width: 100%; min-height: 48px; border: 1px solid rgba(201,176,142,.72); border-radius: .75rem; background: rgba(255,255,255,.88); padding: .7rem .85rem; color: var(--booking-dark); }
   .booking-input:focus-visible, .service-option:focus-visible, .mode-option:focus-visible, .slot-option:focus-visible, .booking-actions button:focus-visible, .booking-again:focus-visible { outline: 3px solid #8a5e45; outline-offset: 3px; }
   .booking-subheading { margin: 1.5rem 0 .65rem; }
   .slot-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: .65rem; min-height: 48px; }
-  .slot-option { padding: .7rem 1rem; min-width: 80px; text-align: center; font-weight: 650; }
+  .slot-option { padding: .7rem 1rem; min-width: 80px; text-align: center; font-weight: 650; background: rgba(255,255,255,.78); border: 1px solid rgba(201,176,142,.45); border-radius: 999px; box-shadow: 0 1px 3px rgba(29,58,23,.06); }
+  .slot-option:hover { transform: none; background: rgba(229,211,179,.82); border-color: rgba(45,90,39,.4); box-shadow: none; }
+  .slot-option.is-selected { background: var(--booking-green); color: white; border-color: var(--booking-green); box-shadow: 0 5px 14px rgba(45,90,39,.2); }
+  .slot-option:disabled, .slot-option[aria-disabled="true"] { color: rgba(29,58,23,.42); background: rgba(201,176,142,.25); border: 1px dashed rgba(138,94,69,.35); box-shadow: none; cursor: not-allowed; text-decoration: line-through; transform: none; }
   .booking-field { margin: 1rem 0; }
   .booking-summary-wrap { margin-top: 1.6rem; padding-top: 1rem; border-top: 1px solid var(--booking-line); }
-  .booking-summary { background: var(--booking-cream); border-radius: 1rem; padding: .4rem 1rem; margin: .8rem 0; }
+  .booking-summary { background: rgba(255,255,255,.72); border: 1px solid rgba(201,176,142,.35); border-radius: 1.5rem; padding: .5rem 1.25rem; margin: .8rem 0; }
   .booking-summary > div { display: flex; justify-content: space-between; gap: 1rem; padding: .65rem 0; border-bottom: 1px solid rgba(31,60,44,.1); }
   .booking-summary > div:last-child { border-bottom: 0; }
   .booking-summary dt { color: #59675d; }
@@ -479,12 +518,27 @@ const { lang = 'es' } = Astro.props;
   .booking-confirm-contact p { margin: .2rem 0; }
   .booking-actions { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.75rem; }
   .booking-actions button, .booking-again { min-height: 52px; border: 0; border-radius: 999px; padding: .75rem 1.5rem; font: inherit; font-weight: 700; cursor: pointer; }
-  .booking-back { background: #eeeadd; color: var(--booking-dark); }
+  .booking-back { background: rgba(229,211,179,.8); color: var(--booking-dark); }
   .booking-next, .booking-again { margin-left: auto; background: var(--booking-green); color: white; box-shadow: 0 5px 14px rgba(45,90,39,.2); }
   .booking-next:not(:disabled):active, .booking-again:active { transform: scale(.98); }
   .booking-next:disabled { opacity: .48; cursor: not-allowed; }
   .booking-error { color: #a32929; background: #fff0ee; border-radius: .65rem; padding: .8rem 1rem; margin: 1rem 0 0; }
   .booking-status, .booking-empty, .booking-config-note { color: #59675d; margin: 1rem 0; }
+  .booking-status:empty { display: none; }
+  .booking-visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  .booking-skeleton { display: grid; gap: .8rem; padding: .35rem 0 1rem; }
+  .booking-skeleton i, .booking-skeleton .skeleton-title, .booking-skeleton .skeleton-subtitle { display: block; background: linear-gradient(100deg, #eee9df 20%, #f8f5ef 38%, #eee9df 56%); background-size: 220% 100%; animation: booking-skeleton-shimmer 1.45s linear infinite; }
+  .skeleton-progress { display: flex; justify-content: space-between; padding: 0 0 1rem; border-bottom: 1px solid rgba(201,176,142,.45); }
+  .skeleton-progress i { width: 2rem; height: 2rem; border-radius: 50%; }
+  .skeleton-title { width: min(220px, 72%); height: 1.45rem; border-radius: .5rem; margin-top: .2rem; }
+  .skeleton-subtitle { width: min(300px, 95%); height: .9rem; border-radius: .4rem; }
+  .skeleton-service-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,250px),1fr)); gap: .85rem; margin-top: .35rem; }
+  .skeleton-service { min-height: 220px; display: flex; flex-direction: column; justify-content: center; gap: .65rem; border: 1px solid rgba(201,176,142,.35); border-radius: 1.5rem; background: rgba(255,255,255,.48); padding: 1.5rem; }
+  .skeleton-service-title { width: 55%; height: 1rem; border-radius: .35rem; }
+  .skeleton-service-description { width: 96%; height: .72rem; border-radius: .35rem; }
+  .skeleton-service-description.short { width: 72%; }
+  .skeleton-service-meta { width: 38%; height: .75rem; border-radius: .35rem; margin-top: .15rem; }
+  @keyframes booking-skeleton-shimmer { to { background-position-x: -220%; } }
   .booking-config-note { background: #fff8e8; border-left: 3px solid var(--booking-earth); padding: .8rem 1rem; font-size: .9rem; }
   .booking-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .booking-success { text-align: center; padding: 1rem 0; }
@@ -497,7 +551,12 @@ const { lang = 'es' } = Astro.props;
     .booking-heading { margin-bottom: 1.2rem; }
     .booking-heading h1 { font-size: clamp(1.9rem, 8vw, 2.6rem); }
     .booking-heading > p:last-child { font-size: .98rem; line-height: 1.5; }
-    .booking-card { padding: 1.15rem; border-radius: 1.2rem; }
+    .booking-card { padding: 0; border-radius: 0; }
+    .booking-skeleton { gap: .7rem; }
+    .skeleton-progress { padding-bottom: .8rem; }
+    .skeleton-progress i { width: 1.65rem; height: 1.65rem; }
+    .skeleton-service-grid { grid-template-columns: 1fr; gap: .65rem; }
+    .skeleton-service { min-height: 240px; padding: 1.4rem 1.2rem; border-radius: 1.35rem; }
     .booking-progress { display: none; }
     .booking-progress-mobile { display: block; margin: 0 0 1.25rem; padding: 0 0 1rem; border-bottom: 1px solid rgba(201,176,142,.55); }
     .booking-progress-mobile-label { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; margin-bottom: .65rem; }
@@ -509,21 +568,22 @@ const { lang = 'es' } = Astro.props;
     .booking-step h2 { font-size: 1.35rem; margin-bottom: .55rem; }
     .booking-hint { line-height: 1.5; font-size: .95rem; }
     .service-grid { grid-template-columns: 1fr; gap: .65rem; margin-top: 1rem; }
-    .service-option { min-height: 94px; padding: 1rem; border-radius: .9rem; }
-    .service-title { font-size: 1rem; }
-    .service-description { font-size: .88rem; line-height: 1.4; }
+    .service-option { min-height: 260px; padding: 1.5rem 1.25rem; border-radius: 1.35rem; }
+    .service-title { font-size: 1.1rem; }
+    .service-price { font-size: 2rem; }
+    .service-description { font-size: .92rem; line-height: 1.45; }
     .mode-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: .7rem; margin-top: 1rem; }
-    .mode-option { min-height: 112px; padding: .9rem .6rem; border-radius: .9rem; }
+    .mode-option { min-height: 145px; padding: 1.1rem .75rem; border-radius: 1.25rem; }
     .booking-label { margin-top: .75rem; }
     .booking-input { min-height: 52px; font-size: 16px; }
     .booking-subheading { margin-top: 1.25rem; }
     .slot-list { grid-template-columns: repeat(auto-fill, minmax(82px, 1fr)); gap: .55rem; }
     .slot-option { min-height: 48px; min-width: 0; padding: .6rem .4rem; border-radius: .75rem; }
-    .booking-summary { padding: .35rem .85rem; }
+    .booking-summary { padding: .35rem .85rem; border-radius: 1.2rem; }
     .booking-summary > div { gap: .6rem; padding: .65rem 0; }
     .booking-summary dt, .booking-summary dd { font-size: .9rem; }
     .booking-summary dd { max-width: 62%; overflow-wrap: anywhere; }
-    .booking-actions { position: sticky; bottom: 0; z-index: 5; margin: 1.25rem -1.15rem -1.15rem; padding: .8rem 1.15rem calc(.8rem + env(safe-area-inset-bottom)); background: rgba(255,255,255,.97); border-top: 1px solid rgba(201,176,142,.5); border-radius: 0 0 1.15rem 1.15rem; box-shadow: 0 -8px 20px rgba(29,58,23,.06); backdrop-filter: blur(12px); }
+    .booking-actions { position: sticky; bottom: 0; z-index: 5; margin: 1.25rem -.75rem -1rem; padding: .8rem .75rem calc(.8rem + env(safe-area-inset-bottom)); background: rgba(229,211,179,.96); border-top: 1px solid rgba(201,176,142,.5); box-shadow: 0 -8px 20px rgba(29,58,23,.06); }
     .booking-actions button { min-height: 52px; flex: 1; padding-inline: .8rem; font-size: .96rem; }
     .booking-next { flex: 1; max-width: none; }
     .booking-back { flex: 0 0 35%; max-width: none; }
@@ -534,13 +594,14 @@ const { lang = 'es' } = Astro.props;
   }
   @media (max-width: 380px) {
     .booking-shell { padding-inline: .5rem; }
-    .booking-card { padding: .95rem; }
-    .booking-actions { margin: 1.2rem -.95rem -.95rem; padding-inline: .95rem; }
+    .booking-card { padding: 0; }
+    .booking-actions { margin: 1.2rem -.5rem -1rem; padding-inline: .5rem; }
     .mode-grid { grid-template-columns: 1fr; }
     .mode-option { min-height: 80px; flex-direction: row; }
     .booking-progress-mobile-label strong { font-size: .94rem; }
   }
   @media (prefers-reduced-motion: reduce) {
     .booking-shell *, .booking-shell *::before, .booking-shell *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    .booking-skeleton i, .booking-skeleton .skeleton-title, .booking-skeleton .skeleton-subtitle { animation: none; background: #eee9df; }
   }
 </style>
