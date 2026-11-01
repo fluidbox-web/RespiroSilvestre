@@ -4,15 +4,17 @@ interface Props {
 }
 
 const { lang = 'es' } = Astro.props;
+import { WHATSAPP_NUMBER } from '../config';
 ---
 
 <section class="booking-shell" data-lang={lang} aria-labelledby="booking-title">
   <div class="booking-heading">
-    <p class="booking-eyebrow">Respiro Silvestre</p>
-    <h1 id="booking-title">{lang === 'es' ? 'Agenda tu sesión' : 'Book your session'}</h1>
-    <p>{lang === 'es' ? 'Elige tu servicio y encuentra el horario que mejor te funcione.' : 'Choose your service and find a time that works for you.'}</p>
+    <p class="booking-eyebrow">{lang === 'es' ? 'UN MOMENTO PARA TI' : 'A MOMENT FOR YOURSELF'}</p>
+    <h1 id="booking-title">{lang === 'es' ? 'Tu pausa empieza aquí.' : 'Your pause starts here.'}</h1>
+    <p>{lang === 'es' ? 'Encuentra tu sesión ideal. Nosotros nos encargamos de cuidarte.' : 'Find your ideal session. Let us take care of you.'}</p>
   </div>
 
+  <div class="booking-layout">
   <div class="booking-card" aria-busy="true">
     <ol class="booking-progress" aria-label={lang === 'es' ? 'Progreso de reserva' : 'Booking progress'}></ol>
     <div class="booking-progress-mobile" role="group" aria-label={lang === 'es' ? 'Progreso de reserva' : 'Booking progress'}>
@@ -43,6 +45,15 @@ const { lang = 'es' } = Astro.props;
       <button type="button" class="booking-back">{lang === 'es' ? 'Atrás' : 'Back'}</button>
       <button type="button" class="booking-next" disabled>{lang === 'es' ? 'Siguiente' : 'Next'}</button>
     </div>
+    <p class="booking-action-hint" aria-live="polite"></p>
+  </div>
+  <aside class="booking-aside" aria-label={lang === 'es' ? 'Tu sesión' : 'Your session'}>
+    <div class="booking-aside-heading"><span aria-hidden="true">✳</span><p>{lang === 'es' ? 'TU ESPACIO DE BIENESTAR' : 'YOUR SPACE FOR WELLBEING'}</p></div>
+    <h2>{lang === 'es' ? 'Un respiro a tu medida' : 'A pause, just for you'}</h2>
+    <div class="booking-live-summary"></div>
+    <p class="booking-aside-note">{lang === 'es' ? 'Al enviar tu solicitud, te contactaremos por WhatsApp para confirmar tu sesión.' : 'After you send your request, we’ll contact you on WhatsApp to confirm your session.'}</p>
+    <a class="booking-help" href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">{lang === 'es' ? '¿Necesitas ayuda? Escríbenos' : 'Need a hand? Message us'} <span aria-hidden="true">↗</span></a>
+  </aside>
   </div>
 </section>
 
@@ -63,20 +74,35 @@ const { lang = 'es' } = Astro.props;
     const backButton = root.querySelector<HTMLButtonElement>('.booking-back')!;
     const nextButton = root.querySelector<HTMLButtonElement>('.booking-next')!;
     const lang = root.dataset.lang === 'en' ? 'en' : 'es';
+    const ux = lang === 'es' ? {
+      next: ['Elegir modalidad', 'Elegir fecha y hora', 'Continuar con mis datos', 'Revisar solicitud'],
+      hints: ['Selecciona un servicio para continuar.', 'Selecciona dónde quieres tu sesión.', 'Selecciona una fecha y un horario.', 'Completa los campos obligatorios para continuar.', 'Tu sesión se confirmará por WhatsApp.'],
+      pending: 'Por elegir', empty: 'Tu sesión empieza con una elección. Aquí verás los detalles a medida que avances.',
+      home: 'Disfruta tu sesión en la comodidad de tu espacio.', local: 'Regálate una pausa en nuestro espacio de bienestar.',
+      details: 'Solo necesitamos estos datos para coordinar tu sesión.', phone: 'Incluye tu código de país. Te contactaremos para confirmar.',
+      timezone: 'Horarios en', noSlots: 'Prueba con otra fecha para encontrar tu espacio.', retry: 'Volver a intentar', edit: 'Editar',
+    } : {
+      next: ['Choose location', 'Choose date and time', 'Continue to my details', 'Review request'],
+      hints: ['Choose a service to continue.', 'Choose where you’d like your session.', 'Choose a date and time.', 'Complete the required fields to continue.', 'Your session will be confirmed on WhatsApp.'],
+      pending: 'To be chosen', empty: 'Your session starts with a choice. Your details will appear here as you go.',
+      home: 'Enjoy your session in the comfort of your own space.', local: 'Take a pause in our space for wellbeing.',
+      details: 'We just need these details to arrange your session.', phone: 'Include your country code. We’ll contact you to confirm.',
+      timezone: 'Times in', noSlots: 'Try another date to find your moment.', retry: 'Try again', edit: 'Edit',
+    };
     const copy = lang === 'es' ? {
       loading: 'Cargando servicios…', loadingAvailability: 'Buscando horarios…', noServices: 'Sin servicios disponibles',
       steps: ['Servicio', 'Modalidad', 'Fecha y horario', 'Tus datos', 'Confirmación'],
       chooseService: 'Elige el servicio que quieres reservar.', chooseMode: '¿Dónde prefieres recibir tu sesión?', atHome: 'A domicilio', atLocal: 'En el local',
       selectService: 'Elegir este servicio', selected: 'Servicio seleccionado',
       date: 'Elige una fecha', time: 'Horarios disponibles', noSlots: 'Sin horarios ese día', selectTime: 'Selecciona un horario para continuar.',
-      name: 'Nombre completo', phone: 'WhatsApp', namePlaceholder: 'Ej. Ana Pérez', phonePlaceholder: 'Solo números, 8 a 15 dígitos',
+      name: 'Nombre completo', phone: 'WhatsApp', namePlaceholder: 'Ej. Ana Pérez', phonePlaceholder: 'Ej. +52 983 123 4567',
       summary: 'Resumen de tu reserva', duration: 'Duración', price: 'Precio', dateLabel: 'Fecha', timeLabel: 'Hora', serviceLabel: 'Servicio', modeLabel: 'Modalidad',
-      confirmIntro: 'Revisa los datos antes de enviar tu solicitud.', reserve: 'Reservar', sending: 'Enviando…', success: '¡Solicitud enviada! Te confirmaremos por WhatsApp.', another: 'Agendar otra',
-      noModeField: 'La API no ofrece un campo personalizado para guardar la modalidad. La elección se mostrará en este resumen, pero no quedará asociada a la reserva hasta configurar ese campo en la API.',
+      confirmIntro: 'Revisa los datos antes de enviar tu solicitud.', reserve: 'Enviar solicitud', sending: 'Enviando…', success: '¡Solicitud enviada! Te confirmaremos por WhatsApp.', another: 'Agendar otra',
+      noModeField: 'Coordinaremos la modalidad de tu sesión contigo por WhatsApp al confirmar.',
       chooseModeError: 'Selecciona una modalidad para continuar.', invalidName: 'Escribe un nombre de 2 a 120 caracteres.', invalidPhone: 'Escribe un WhatsApp de 8 a 15 dígitos.',
       occupied: 'Ese horario ya se ocupó. Elige otro.', generic: 'No se pudo completar la solicitud. Inténtalo de nuevo.', unavailable: 'No se pudo cargar la disponibilidad.',
       yes: 'Sí', required: 'requerido', optional: 'opcional', choose: 'Selecciona una opción', unavailableServices: 'No fue posible cargar los servicios. Intenta recargar la página.',
-      configuration: 'La API de reservas no está configurada. Revisa PUBLIC_RESERVAS_ENDPOINT y PUBLIC_SITE_TOKEN.',
+      configuration: 'Las reservas en línea no están disponibles por ahora. Escríbenos por WhatsApp y te ayudamos a agendar.',
       confirmation: 'Confirmación', edit: 'Puedes volver atrás para cambiar cualquier dato.'
     } : {
       loading: 'Loading services…', loadingAvailability: 'Searching for times…', noServices: 'No services available',
@@ -84,14 +110,14 @@ const { lang = 'es' } = Astro.props;
       chooseService: 'Choose the service you would like to book.', chooseMode: 'Where would you like your session?', atHome: 'At home', atLocal: 'At the studio',
       selectService: 'Choose this service', selected: 'Service selected',
       date: 'Choose a date', time: 'Available times', noSlots: 'No times available that day', selectTime: 'Select a time to continue.',
-      name: 'Full name', phone: 'WhatsApp', namePlaceholder: 'e.g. Ana Pérez', phonePlaceholder: 'Digits only, 8 to 15 digits',
+      name: 'Full name', phone: 'WhatsApp', namePlaceholder: 'e.g. Ana Pérez', phonePlaceholder: 'e.g. +52 983 123 4567',
       summary: 'Booking summary', duration: 'Duration', price: 'Price', dateLabel: 'Date', timeLabel: 'Time', serviceLabel: 'Service', modeLabel: 'Location',
-      confirmIntro: 'Review your details before sending your request.', reserve: 'Book now', sending: 'Sending…', success: 'Request sent! We’ll confirm with you on WhatsApp.', another: 'Book another',
-      noModeField: 'The API does not provide a custom field to save the location. Your choice appears in this summary, but will not be attached to the booking until that field is configured in the API.',
+      confirmIntro: 'Review your details before sending your request.', reserve: 'Send request', sending: 'Sending…', success: 'Request sent! We’ll confirm with you on WhatsApp.', another: 'Book another',
+      noModeField: 'We’ll arrange your session location with you on WhatsApp when confirming.',
       chooseModeError: 'Choose a location to continue.', invalidName: 'Enter a name between 2 and 120 characters.', invalidPhone: 'Enter a WhatsApp number with 8 to 15 digits.',
       occupied: 'That time was just booked. Please choose another.', generic: 'We could not complete your request. Please try again.', unavailable: 'Could not load availability.',
       yes: 'Yes', required: 'required', optional: 'optional', choose: 'Choose an option', unavailableServices: 'Could not load services. Please reload the page.',
-      configuration: 'The booking API is not configured. Check PUBLIC_RESERVAS_ENDPOINT and PUBLIC_SITE_TOKEN.',
+      configuration: 'Online booking is currently unavailable. Message us on WhatsApp and we’ll help you book.',
       confirmation: 'Confirmation', edit: 'Go back to change any details.'
     };
 
@@ -105,6 +131,7 @@ const { lang = 'es' } = Astro.props;
     let selectedSlot: Slot | null = null;
     let slots: Slot[] = [];
     let loadingSlots = false;
+    let slotsFailed = false;
     let submitting = false;
     let succeeded = false;
     let customValues: Record<string, string | number> = {};
@@ -166,17 +193,21 @@ const { lang = 'es' } = Astro.props;
         const name = stepPanel.querySelector<HTMLInputElement>('[name="cliente_nombre"]')?.value.trim() || '';
         const phone = stepPanel.querySelector<HTMLInputElement>('[name="cliente_telefono"]')?.value.replace(/\D/g, '') || '';
         if (name.length < 2 || name.length > 120 || phone.length < 8 || phone.length > 15) return false;
+        if (!Array.from(stepPanel.querySelectorAll<HTMLInputElement | HTMLSelectElement>('.booking-input')).every((input) => input.checkValidity())) return false;
         return currentFields().filter((field) => field.key !== modeField()?.key).every((field) => !field.requerido || String(customValues[field.key] ?? '').trim() !== '');
       }
       return currentStep === 4;
     }
 
     function updateActions() {
-      actions.hidden = succeeded || !config || currentStep === 0;
-      backButton.hidden = currentStep === 0;
-      nextButton.hidden = currentStep === 0 || succeeded;
+      actions.hidden = succeeded || !config || !config.servicios.length;
+      backButton.hidden = currentStep === 0 || submitting;
+      nextButton.hidden = succeeded;
       nextButton.disabled = !validStep();
-      nextButton.textContent = currentStep === 3 ? copy.confirmation : (lang === 'es' ? 'Siguiente' : 'Next');
+      nextButton.textContent = ux.next[currentStep] || copy.reserve;
+      root.querySelector<HTMLElement>('.booking-action-hint')!.textContent = succeeded || !config ? '' : ux.hints[currentStep];
+      const liveSummary = root.querySelector<HTMLElement>('.booking-live-summary')!;
+      liveSummary.innerHTML = selectedService ? `<p class="booking-aside-service">${escapeHtml(selectedService.nombre)}</p><p class="booking-aside-duration">${escapeHtml(formatDuration(selectedService.duracion_minutos))}</p><dl class="booking-aside-details"><div><dt>${copy.modeLabel}</dt><dd>${escapeHtml(mode ? mode === 'home' ? copy.atHome : copy.atLocal : ux.pending)}</dd></div><div><dt>${copy.dateLabel}</dt><dd>${escapeHtml(selectedDate && (currentStep >= 2 || selectedSlot) ? dateLabel(selectedDate) : ux.pending)}</dd></div><div><dt>${copy.timeLabel}</dt><dd>${escapeHtml(selectedSlot?.label || ux.pending)}</dd></div></dl><div class="booking-aside-total"><span>${copy.price}</span><strong>${escapeHtml(formatPrice(selectedService.precio))}</strong></div>` : `<p class="booking-aside-empty">${ux.empty}</p>`;
       if (currentStep === 4 && !succeeded) {
         actions.hidden = false;
         nextButton.hidden = false;
@@ -187,6 +218,8 @@ const { lang = 'es' } = Astro.props;
         item.classList.toggle('is-current', index === currentStep);
         item.classList.toggle('is-complete', index < currentStep || succeeded);
         item.setAttribute('aria-current', index === currentStep ? 'step' : 'false');
+        const button = item.querySelector<HTMLButtonElement>('button');
+        if (button) button.disabled = index >= currentStep || submitting || succeeded;
       });
       const mobileProgress = root.querySelector<HTMLElement>('.booking-progress-mobile')!;
       const mobileLabel = mobileProgress.querySelector<HTMLElement>('strong')!;
@@ -207,11 +240,17 @@ const { lang = 'es' } = Astro.props;
       if (!config) return;
       setError();
       status.textContent = '';
-      progress.innerHTML = copy.steps.map((label, index) => `<li><span>${index + 1}</span><small>${escapeHtml(label)}</small></li>`).join('');
+      progress.innerHTML = copy.steps.map((label, index) => `<li><button type="button" data-step="${index}" aria-label="${escapeHtml(`${ux.edit}: ${label}`)}"><span>${index < currentStep || succeeded ? '✓' : index + 1}</span><small>${escapeHtml(label)}</small></button></li>`).join('');
+      progress.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((button) => button.addEventListener('click', () => {
+        if (submitting || succeeded || Number(button.dataset.step) >= currentStep) return;
+        currentStep = Number(button.dataset.step);
+        renderStep();
+      }));
 
       if (succeeded) {
         stepPanel.innerHTML = `<div class="booking-success"><div class="booking-check" aria-hidden="true">✓</div><h2>${copy.success}</h2>${renderSummary()}<button type="button" class="booking-again">${copy.another}</button></div>`;
         stepPanel.querySelector<HTMLButtonElement>('.booking-again')!.addEventListener('click', resetWizard);
+        stepPanel.focus();
         updateActions();
         return;
       }
@@ -219,31 +258,36 @@ const { lang = 'es' } = Astro.props;
       if (currentStep === 0) {
         stepPanel.innerHTML = `<h2>${copy.steps[0]}</h2><p class="booking-hint">${copy.chooseService}</p>${config.servicios.length ? `<div class="service-grid">${config.servicios.map((service) => {
           const isSelected = selectedService?.id === service.id;
-          return `<button type="button" class="service-option ${isSelected ? 'is-selected' : ''}" data-service-id="${escapeHtml(service.id)}" aria-pressed="${isSelected}"><span class="service-title">${escapeHtml(service.nombre)}</span>${service.precio > 0 ? `<span class="service-price">${escapeHtml(formatPrice(service.precio))}</span>` : ''}<span class="service-description">${escapeHtml(service.descripcion || '')}</span><span class="service-meta">${escapeHtml(formatDuration(service.duracion_minutos))}</span><span class="service-cta">${isSelected ? copy.selected : copy.selectService}</span></button>`;
+          return `<button type="button" class="service-option ${isSelected ? 'is-selected' : ''}" data-service-id="${escapeHtml(service.id)}" aria-pressed="${isSelected}"><span class="service-title">${escapeHtml(service.nombre)}</span><span class="service-price">${escapeHtml(formatPrice(service.precio))}</span><span class="service-description">${escapeHtml(service.descripcion || '')}</span><span class="service-meta">${escapeHtml(formatDuration(service.duracion_minutos))}</span><span class="service-cta">${isSelected ? copy.selected : copy.selectService}</span></button>`;
         }).join('')}</div>` : `<p class="booking-empty">${copy.noServices}</p>`}`;
         stepPanel.querySelectorAll<HTMLButtonElement>('[data-service-id]').forEach((button) => button.addEventListener('click', () => {
+          if (selectedService?.id === button.dataset.serviceId) return;
           selectedService = config!.servicios.find((service) => service.id === button.dataset.serviceId) || null;
+          requestVersion++;
+          loadingSlots = false;
           customValues = {};
           mode = '';
           selectedDate = config!.hoy;
           selectedSlot = null;
           slots = [];
-          currentStep = 1;
           renderStep();
+          stepPanel.querySelector<HTMLButtonElement>(`[data-service-id="${CSS.escape(selectedService!.id)}"]`)?.focus({ preventScroll: true });
         }));
       } else if (currentStep === 1) {
-        const homeOpt = modeOption('home');
-        const localOpt = modeOption('local');
-        const noMapping = !homeOpt || !localOpt;
-        stepPanel.innerHTML = `<h2>${copy.steps[1]}</h2><p class="booking-hint">${copy.chooseMode}</p><div class="mode-grid"><button type="button" class="mode-option ${mode === 'home' ? 'is-selected' : ''}" data-mode="home" aria-pressed="${mode === 'home'}"><span class="mode-icon" aria-hidden="true">⌂</span><strong>${copy.atHome}</strong></button><button type="button" class="mode-option ${mode === 'local' ? 'is-selected' : ''}" data-mode="local" aria-pressed="${mode === 'local'}"><span class="mode-icon" aria-hidden="true">⌖</span><strong>${copy.atLocal}</strong></button></div>${noMapping ? `<p class="booking-config-note">${copy.noModeField}</p>` : ''}`;
+        const coordinateMode = !modeOption('home') || !modeOption('local');
+        stepPanel.innerHTML = `<h2>${copy.steps[1]}</h2><p class="booking-hint">${copy.chooseMode}</p><div class="mode-grid"><button type="button" class="mode-option ${mode === 'home' ? 'is-selected' : ''}" data-mode="home" aria-pressed="${mode === 'home'}"><span class="mode-icon" aria-hidden="true">⌂</span><strong>${copy.atHome}</strong><span class="mode-description">${ux.home}</span></button><button type="button" class="mode-option ${mode === 'local' ? 'is-selected' : ''}" data-mode="local" aria-pressed="${mode === 'local'}"><span class="mode-icon" aria-hidden="true">⌖</span><strong>${copy.atLocal}</strong><span class="mode-description">${ux.local}</span></button></div>${coordinateMode ? `<p class="booking-field-help">${copy.noModeField}</p>` : ''}`;
         stepPanel.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => {
+          if (mode === button.dataset.mode) return;
+          requestVersion++;
+          loadingSlots = false;
           mode = button.dataset.mode || '';
           selectedSlot = null;
           slots = [];
           renderStep();
+          stepPanel.querySelector<HTMLButtonElement>(`[data-mode="${mode}"]`)?.focus({ preventScroll: true });
         }));
       } else if (currentStep === 2) {
-        stepPanel.innerHTML = `<h2>${copy.steps[2]}</h2><label class="booking-label" for="booking-date">${copy.date}</label><input class="booking-input" type="date" id="booking-date" name="fecha" min="${escapeHtml(config.hoy)}" max="${escapeHtml(config.fecha_max)}" value="${escapeHtml(selectedDate || config.hoy)}" /><h3 class="booking-subheading">${copy.time}</h3><div class="slot-list" aria-live="polite"></div>`;
+        stepPanel.innerHTML = `<h2>${copy.steps[2]}</h2><label class="booking-label" for="booking-date">${copy.date}</label><input class="booking-input" type="date" id="booking-date" name="fecha" min="${escapeHtml(config.hoy)}" max="${escapeHtml(config.fecha_max)}" value="${escapeHtml(selectedDate || config.hoy)}" /><p class="booking-field-help">${ux.timezone} ${escapeHtml(config.timezone.replace(/_/g, ' '))}</p><h3 class="booking-subheading">${copy.time}</h3><div class="slot-list" aria-live="polite"></div>`;
         const dateInput = stepPanel.querySelector<HTMLInputElement>('#booking-date')!;
         if (!selectedDate) selectedDate = config.hoy;
         dateInput.addEventListener('change', () => {
@@ -267,7 +311,7 @@ const { lang = 'es' } = Astro.props;
           else control = `<input class="booking-input" type="text" maxlength="200" id="${id}" name="custom:${escapeHtml(field.key)}" value="${value}" ${required}/>`;
           return `<div class="booking-field"><label class="booking-label" for="${id}">${label}</label>${control}</div>`;
         }).join('');
-        stepPanel.innerHTML = `<h2>${copy.steps[3]}</h2><div class="booking-field"><label class="booking-label" for="cliente-nombre">${copy.name} *</label><input class="booking-input" id="cliente-nombre" name="cliente_nombre" type="text" minlength="2" maxlength="120" required autocomplete="name" placeholder="${copy.namePlaceholder}"/></div><div class="booking-field"><label class="booking-label" for="cliente-telefono">${copy.phone} *</label><input class="booking-input" id="cliente-telefono" name="cliente_telefono" type="tel" inputmode="numeric" pattern="[0-9]{8,15}" minlength="8" maxlength="15" required autocomplete="tel" placeholder="${copy.phonePlaceholder}"/></div>${htmlFields}<div class="booking-field booking-honeypot" aria-hidden="true"><label for="booking-website">Website</label><input id="booking-website" name="website" type="text" tabindex="-1" autocomplete="off" value=""/></div><div class="booking-summary-wrap"><h3>${copy.summary}</h3>${renderSummary()}</div>`;
+        stepPanel.innerHTML = `<h2>${copy.steps[3]}</h2><p class="booking-hint">${ux.details}</p><div class="booking-field"><label class="booking-label" for="cliente-nombre">${copy.name} *</label><input class="booking-input" id="cliente-nombre" name="cliente_nombre" type="text" minlength="2" maxlength="120" required autocomplete="name" placeholder="${copy.namePlaceholder}"/></div><div class="booking-field"><label class="booking-label" for="cliente-telefono">${copy.phone} *</label><input class="booking-input" id="cliente-telefono" name="cliente_telefono" type="tel" inputmode="tel" maxlength="24" aria-describedby="booking-phone-help" required autocomplete="tel" placeholder="${copy.phonePlaceholder}"/><p id="booking-phone-help" class="booking-field-help">${ux.phone}</p></div>${htmlFields}<div class="booking-field booking-honeypot" aria-hidden="true"><label for="booking-website">Website</label><input id="booking-website" name="website" type="text" tabindex="-1" autocomplete="off" value=""/></div>`;
         stepPanel.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[name]').forEach((input) => {
           input.addEventListener('input', onDetailsInput);
           input.addEventListener('change', onDetailsInput);
@@ -292,14 +336,19 @@ const { lang = 'es' } = Astro.props;
         container.innerHTML = `<p class="booking-empty">${copy.loadingAvailability}</p>`;
         return;
       }
+      if (slotsFailed) {
+        container.innerHTML = `<button type="button" class="booking-retry">${ux.retry}</button>`;
+        container.querySelector<HTMLButtonElement>('.booking-retry')!.addEventListener('click', loadAvailability);
+        return;
+      }
       if (!slots.length) {
-        container.innerHTML = `<p class="booking-empty">${copy.noSlots}</p>`;
+        container.innerHTML = `<p class="booking-empty">${copy.noSlots}. ${ux.noSlots}</p>`;
         return;
       }
       container.innerHTML = slots.map((slot, index) => `<button type="button" class="slot-option ${selectedSlot?.iso === slot.iso ? 'is-selected' : ''}" data-slot-index="${index}" aria-pressed="${selectedSlot?.iso === slot.iso}">${escapeHtml(slot.label)}</button>`).join('');
       container.querySelectorAll<HTMLButtonElement>('[data-slot-index]').forEach((button) => button.addEventListener('click', () => {
         selectedSlot = slots[Number(button.dataset.slotIndex)] || null;
-        container.querySelectorAll('.slot-option').forEach((item) => item.classList.remove('is-selected'));
+        container.querySelectorAll('.slot-option').forEach((item) => { item.classList.remove('is-selected'); item.setAttribute('aria-pressed', 'false'); });
         button.classList.add('is-selected');
         button.setAttribute('aria-pressed', 'true');
         updateActions();
@@ -309,6 +358,7 @@ const { lang = 'es' } = Astro.props;
     async function loadAvailability() {
       if (!config || currentStep !== 2) return;
       const version = ++requestVersion;
+      slotsFailed = false;
       if (!selectedDate) {
         loadingSlots = false;
         slots = [];
@@ -317,6 +367,16 @@ const { lang = 'es' } = Astro.props;
         updateActions();
         return;
       }
+      if (selectedDate < config.hoy || selectedDate > config.fecha_max) {
+        selectedSlot = null;
+        slots = [];
+        loadingSlots = false;
+        renderSlots();
+        setError(lang === 'es' ? 'Elige una fecha dentro del rango disponible.' : 'Choose a date within the available range.');
+        updateActions();
+        return;
+      }
+      setError();
       loadingSlots = true;
       slots = [];
       selectedSlot = null;
@@ -332,7 +392,10 @@ const { lang = 'es' } = Astro.props;
         const formatter = new Intl.DateTimeFormat('es-MX', { timeZone: timezone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
         slots = (result.data.slots || []).map((iso: string) => ({ iso, label: formatter.format(new Date(iso)) }));
       } catch (error) {
-        if (version === requestVersion) setError(error instanceof Error ? error.message : copy.unavailable);
+        if (version === requestVersion) {
+          slotsFailed = true;
+          setError(copy.unavailable);
+        }
       } finally {
         if (version === requestVersion) {
           loadingSlots = false;
@@ -392,7 +455,7 @@ const { lang = 'es' } = Astro.props;
             renderStep();
             throw new Error(copy.occupied);
           }
-          throw new Error(result.error || copy.generic);
+          throw new Error(copy.generic);
         }
         succeeded = true;
         renderStep();
@@ -405,6 +468,8 @@ const { lang = 'es' } = Astro.props;
     }
 
     function resetWizard() {
+      requestVersion++;
+      loadingSlots = false;
       currentStep = 0;
       selectedService = null;
       mode = '';
@@ -419,12 +484,14 @@ const { lang = 'es' } = Astro.props;
     }
 
     backButton.addEventListener('click', () => {
+      if (submitting) return;
       if (currentStep > 0) {
         currentStep--;
         renderStep();
       }
     });
     nextButton.addEventListener('click', async () => {
+      if (submitting) return;
       if (!validStep()) {
         if (currentStep === 1 && !mode) setError(copy.chooseModeError);
         else if (currentStep === 2) setError(copy.selectTime);
@@ -436,6 +503,7 @@ const { lang = 'es' } = Astro.props;
     });
 
     async function initialize() {
+      errorPanel.hidden = true;
       if (!endpoint || !siteToken) {
         setError(copy.configuration);
         card.setAttribute('aria-busy', 'false');
@@ -451,8 +519,14 @@ const { lang = 'es' } = Astro.props;
         status.textContent = '';
         card.setAttribute('aria-busy', 'false');
         renderStep();
-      } catch (error) {
-        setError(error instanceof Error ? error.message : copy.unavailableServices);
+      } catch {
+        setError(copy.unavailableServices);
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.className = 'booking-retry';
+        retry.textContent = ux.retry;
+        retry.addEventListener('click', () => { retry.remove(); initialize(); });
+        errorPanel.append(' ', retry);
         card.setAttribute('aria-busy', 'false');
       }
     }
@@ -604,4 +678,114 @@ const { lang = 'es' } = Astro.props;
     .booking-shell *, .booking-shell *::before, .booking-shell *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
     .booking-skeleton i, .booking-skeleton .skeleton-title, .booking-skeleton .skeleton-subtitle { animation: none; background: #eee9df; }
   }
+
+  /* Calm surfaces and clear hierarchy keep the choice at the center of the flow. */
+  .booking-shell { --booking-green: #355b46; --booking-green-light: #466d54; --booking-dark: #203e30; --booking-line: #deded2; max-width: 1220px; padding: 3.5rem 2rem 5rem; }
+  .booking-heading { margin-bottom: 2.5rem; }
+  .booking-eyebrow { color: #75634d; font-size: .68rem; letter-spacing: .23em; }
+  .booking-heading h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: clamp(2.4rem, 5vw, 3.65rem); letter-spacing: -.045em; line-height: 1.15; margin: .9rem 0; }
+  .booking-heading > p:last-child { font-size: 1rem; line-height: 1.7; }
+  .booking-layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 1.5rem; align-items: start; }
+  .booking-card { padding: 2rem; border: 1px solid #e2dfd2; background: #fffdf8; border-radius: 1.5rem; box-shadow: 0 12px 40px #203e3006; }
+  .booking-progress { gap: .15rem; padding-bottom: 1.5rem; margin-bottom: 2rem; }
+  .booking-progress li { position: relative; }
+  .booking-progress li:not(:last-child)::after { content: ''; position: absolute; height: 1px; background: #deded2; top: 15px; left: calc(50% + 22px); width: calc(100% - 44px); }
+  .booking-progress li.is-complete::after { background: #355b46; }
+  .booking-progress button { color: inherit; border: 0; background: none; font: inherit; display: flex; flex-direction: column; align-items: center; gap: .6rem; padding: 0; cursor: pointer; min-height: 54px; }
+  .booking-progress button:disabled { cursor: default; }
+  .booking-progress li span { width: 30px; height: 30px; background: #f4f3eb; border-color: #dfdfd3; font-size: .75rem; }
+  .booking-progress li.is-current span { box-shadow: 0 0 0 4px #e9eee5; }
+  .booking-progress li small { font-size: .67rem; }
+  .booking-step { min-height: 300px; }
+  .booking-step h2 { font-family: Georgia, 'Times New Roman', serif; font-size: 1.8rem; font-weight: 400; letter-spacing: -.025em; }
+  .booking-hint { font-size: .9rem; line-height: 1.6; margin-bottom: 1.5rem; }
+  .service-grid { grid-template-columns: 1fr; gap: .75rem; }
+  .service-option { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; min-height: 0; padding: 1.3rem 1.4rem 1.3rem 3.6rem; gap: .45rem 1rem; border-radius: 1rem; text-align: left; align-items: start; justify-content: normal; border: 1px solid #deded2; background: #fff; box-shadow: none; }
+  .service-option::before { content: ''; position: absolute; left: 1.3rem; top: 1.45rem; width: 17px; height: 17px; border: 1.5px solid #a3ac9c; border-radius: 50%; }
+  .service-option.is-selected::before { background: var(--booking-green); border-color: var(--booking-green); box-shadow: inset 0 0 0 4px #f0f4eb; }
+  .service-title { font-size: 1rem; font-weight: 650; line-height: 1.5; }
+  .service-price { font-size: 1rem; line-height: 1.5; font-weight: 650; }
+  .service-description { grid-column: 1 / -1; font-size: .86rem; line-height: 1.6; }
+  .service-meta { grid-column: 1 / -1; font-size: .77rem; color: #66715e; }
+  .service-cta { display: none; }
+  .service-option:hover, .service-option:focus-visible, .service-option.is-selected { background: #f0f4eb; border-color: #617e5d; color: var(--booking-dark); box-shadow: none; }
+  .service-option:hover .service-title, .service-option:hover .service-description, .service-option:hover .service-meta, .service-option:focus-visible .service-title, .service-option:focus-visible .service-description, .service-option:focus-visible .service-meta, .service-option.is-selected .service-title, .service-option.is-selected .service-description, .service-option.is-selected .service-meta { color: var(--booking-dark); }
+  .service-option:hover .service-price, .service-option:focus-visible .service-price, .service-option.is-selected .service-price { color: var(--booking-green); }
+  .mode-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mode-option { min-height: 205px; padding: 1.5rem 1rem; border-radius: 1rem; box-shadow: none; background: white; border-color: #deded2; }
+  .mode-option:hover { transform: none; box-shadow: none; background: #f6f7f0; }
+  .mode-option.is-selected { background: #f0f4eb; color: var(--booking-dark); border-color: #617e5d; box-shadow: inset 0 0 0 1px #617e5d; }
+  .mode-icon { color: var(--booking-green); }
+  .mode-description { font-size: .84rem; line-height: 1.6; color: #5c6b5f; max-width: 210px; }
+  .booking-label { font-size: .87rem; margin-top: 1.25rem; }
+  .booking-input { box-sizing: border-box; background: white; border-color: #d5d8cb; font: inherit; min-width: 0; }
+  .booking-field-help { font-size: .77rem; line-height: 1.6; color: #647260; margin-top: .5rem; }
+  .booking-actions { padding-top: 1.5rem; margin-top: 2rem; border-top: 1px solid #e5e5da; }
+  .booking-actions button { border-radius: .8rem; font-size: .88rem; min-height: 48px; }
+  .booking-back { background: transparent; color: #4c5e50; padding-left: .4rem !important; }
+  .booking-back::before { content: '←'; margin-right: .5rem; }
+  .booking-next { box-shadow: none; }
+  .booking-next:not(:disabled)::after { content: '→'; margin-left: .8rem; }
+  .booking-action-hint { font-size: .75rem; color: #62705f; text-align: right; line-height: 1.5; margin: .75rem 0 0; }
+  .booking-action-hint:empty { display: none; }
+  .booking-aside { position: sticky; top: 6rem; padding: 1.8rem 1.5rem; border: 1px solid #d9ddcc; border-radius: 1.5rem; background: #eff1e6; }
+  .booking-aside-heading { display: flex; align-items: center; gap: .6rem; color: #5e7256; }
+  .booking-aside-heading > span { font-size: 1.7rem; }
+  .booking-aside-heading p { font-size: .6rem; letter-spacing: .12em; font-weight: 650; }
+  .booking-aside h2 { font: 400 1.65rem/1.25 Georgia, serif; letter-spacing: -.025em; margin: 1rem 0 1.5rem; }
+  .booking-aside-empty, .booking-aside-note { font-size: .8rem; line-height: 1.8; color: #59674f; }
+  .booking-aside-service { font-weight: 650; font-size: 1rem; }
+  .booking-aside-duration { color: #64705e; font-size: .8rem; margin: .35rem 0 1.5rem; }
+  .booking-aside-details { display: grid; gap: .9rem; margin: 0; }
+  .booking-aside-details > div { display: grid; gap: .2rem; }
+  .booking-aside-details dt { color: #64705e; font-size: .72rem; }
+  .booking-aside-details dd { margin: 0; font-size: .84rem; line-height: 1.5; overflow-wrap: anywhere; }
+  .booking-aside-total { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding-top: 1rem; margin-top: 1.3rem; border-top: 1px solid #d5dbc8; font-size: .83rem; }
+  .booking-aside-total strong { font-size: 1rem; }
+  .booking-aside-note { border-top: 1px solid #d5dbc8; margin: 1.5rem 0 1rem; padding-top: 1rem; }
+  .booking-help { display: flex; justify-content: space-between; gap: .5rem; color: var(--booking-green); font-size: .77rem; text-decoration: underline; text-underline-offset: 4px; line-height: 1.6; }
+  .booking-empty { grid-column: 1 / -1; font-size: .88rem; line-height: 1.6; padding: 1rem; border-radius: .75rem; background: #f3f3eb; }
+  .booking-retry { text-decoration: underline; cursor: pointer; font-weight: 650; }
+  .booking-progress button:focus-visible, .booking-help:focus-visible, .booking-retry:focus-visible { outline: 3px solid #8a5e45; outline-offset: 4px; border-radius: .25rem; }
+  @media (max-width: 960px) {
+    .booking-layout { grid-template-columns: minmax(0, 1fr) 245px; gap: 1rem; }
+    .booking-card { padding: 1.5rem; }
+    .booking-aside { padding: 1.5rem 1.2rem; }
+  }
+  @media (max-width: 700px) {
+    .booking-shell { padding: 2rem 1rem 3rem; }
+    .booking-heading { margin-bottom: 1.5rem; }
+    .booking-heading h1 { font-size: 2.5rem; }
+    .booking-heading > p:last-child { font-size: .9rem; }
+    .booking-layout { grid-template-columns: minmax(0, 1fr); }
+    .booking-card { padding: 1.25rem; border-radius: 1.25rem; }
+    .booking-step { min-height: 230px; }
+    .booking-step h2 { font-size: 1.65rem; }
+    .booking-progress-mobile { padding-bottom: 1.2rem; border-color: #e1e1d6; }
+    .booking-progress-mobile-label strong { font-size: .8rem; font-weight: 500; }
+    .booking-progress-mobile-label > span { font-size: .72rem; }
+    .booking-progress-track { height: 4px; }
+    .service-option { padding: 1rem 1rem 1rem 2.9rem; gap: .4rem; border-radius: .9rem; }
+    .service-option::before { left: 1rem; top: 1.25rem; }
+    .service-title { font-size: .95rem; }
+    .service-price { font-size: .88rem; }
+    .service-description { font-size: .82rem; }
+    .mode-option { min-height: 185px; padding: 1rem .7rem; }
+    .mode-description { font-size: .77rem; }
+    .booking-actions { position: sticky; bottom: 0; margin: 1.5rem -1.25rem 0; padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom)); border-color: #e5e5da; background: #fffdf8f5; backdrop-filter: blur(12px); box-shadow: none; }
+    .booking-actions button { font-size: .83rem; }
+    .booking-back { flex: 0 0 auto !important; }
+    .booking-next { flex: 1; }
+    .booking-action-hint { text-align: center; font-size: .72rem; margin-top: .3rem; }
+    .booking-aside { position: static; padding: 1.5rem; border-radius: 1.25rem; }
+    .booking-aside h2 { font-size: 1.5rem; margin-bottom: 1rem; }
+    .booking-aside-details { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .booking-aside-total { justify-content: space-between; }
+  }
+  @media (max-width: 380px) {
+    .service-option { grid-template-columns: 1fr; }
+    .mode-option { flex-direction: column; }
+    .booking-actions button { padding-inline: .6rem; }
+  }
+
 </style>
